@@ -67,7 +67,7 @@ function Register({ setIsAuthenticated }) {
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      bgcolor: '#0a0a0a',
       py: 4
     }}>
       <Container maxWidth="md">
@@ -75,29 +75,37 @@ function Register({ setIsAuthenticated }) {
           <Paper sx={{ 
             p: 4, 
             borderRadius: 4,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-            background: 'rgba(255,255,255,0.95)',
-            backdropFilter: 'blur(10px)'
+            boxShadow: '0 8px 32px rgba(0,255,136,0.3)',
+            bgcolor: '#1a1a1a',
+            border: '2px solid #00ff88'
           }}>
             <Box sx={{ textAlign: 'center', mb: 3 }}>
               <Box sx={{ 
                 display: 'inline-flex',
                 p: 2,
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #00ff88 0%, #00cc6a 100%)',
                 mb: 2
               }}>
-                <HowToReg sx={{ fontSize: 50, color: 'white' }} />
+                <HowToReg sx={{ fontSize: 50, color: '#000' }} />
               </Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#333', mb: 1 }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, color: '#00ff88', mb: 1 }}>
                 Create Account
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: '#fff', opacity: 0.8 }}>
                 Register with secure biometric authentication
               </Typography>
             </Box>
             
-            <Stepper activeStep={activeStep} sx={{ my: 4 }}>
+            <Stepper activeStep={activeStep} sx={{ 
+              my: 4,
+              '& .MuiStepLabel-label': { color: '#aaa', fontWeight: 500 },
+              '& .MuiStepLabel-label.Mui-active': { color: '#00ff88', fontWeight: 700 },
+              '& .MuiStepLabel-label.Mui-completed': { color: '#00ff88' },
+              '& .MuiStepIcon-root': { color: '#333' },
+              '& .MuiStepIcon-root.Mui-active': { color: '#00ff88' },
+              '& .MuiStepIcon-root.Mui-completed': { color: '#00ff88' }
+            }}>
               {steps.map(label => (
                 <Step key={label}>
                   <StepLabel>{label}</StepLabel>
@@ -181,8 +189,29 @@ function Register({ setIsAuthenticated }) {
                 <Box sx={{ mb: 2 }}>
                   <Webcam audio={false} ref={webcamRef} width="100%" screenshotFormat="image/jpeg" />
                   <ButtonGroup fullWidth sx={{ mt: 1 }}>
-                    <Button variant="contained" onClick={() => { setFaceImage(webcamRef.current.getScreenshot()); setShowWebcam(false); }}>Capture</Button>
-                    <Button variant="outlined" onClick={() => setShowWebcam(false)}>Cancel</Button>
+                    <Button 
+                      variant="contained" 
+                      onClick={() => { setFaceImage(webcamRef.current.getScreenshot()); setShowWebcam(false); }}
+                      sx={{
+                        bgcolor: '#00ff88',
+                        color: '#000',
+                        fontWeight: 700,
+                        '&:hover': { bgcolor: '#00cc6a' }
+                      }}
+                    >
+                      Capture
+                    </Button>
+                    <Button 
+                      variant="outlined" 
+                      onClick={() => setShowWebcam(false)}
+                      sx={{ 
+                        color: '#ff4444', 
+                        borderColor: '#ff4444',
+                        '&:hover': { borderColor: '#cc0000', bgcolor: 'rgba(255,68,68,0.1)' }
+                      }}
+                    >
+                      Cancel
+                    </Button>
                   </ButtonGroup>
                 </Box>
               )}
@@ -269,9 +298,11 @@ function Register({ setIsAuthenticated }) {
                             setShowFpWebcam(false); 
                           }}
                           sx={{
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            bgcolor: '#00ff88',
+                            color: '#000',
                             py: 1.5,
-                            fontWeight: 600
+                            fontWeight: 700,
+                            '&:hover': { bgcolor: '#00cc6a' }
                           }}
                         >
                           Capture Thumb
@@ -279,7 +310,12 @@ function Register({ setIsAuthenticated }) {
                         <Button 
                           variant="outlined" 
                           onClick={() => setShowFpWebcam(false)}
-                          sx={{ py: 1.5 }}
+                          sx={{ 
+                            py: 1.5,
+                            color: '#ff4444',
+                            borderColor: '#ff4444',
+                            '&:hover': { borderColor: '#cc0000', bgcolor: 'rgba(255,68,68,0.1)' }
+                          }}
                         >
                           Cancel
                         </Button>
@@ -310,7 +346,7 @@ function Register({ setIsAuthenticated }) {
                 variant="text" 
                 size="small"
                 onClick={() => setUseHardwareScanner(!useHardwareScanner)}
-                sx={{ color: '#667eea' }}
+                sx={{ color: '#00ff88', fontWeight: 600 }}
               >
                 {useHardwareScanner ? '← Back to Camera/Upload' : '🔐 Use Dell Fingerprint Scanner (Requires Windows Hello)'}
               </Button>
@@ -324,9 +360,11 @@ function Register({ setIsAuthenticated }) {
                 size="large"
                 sx={{ 
                   px: 4,
-                  fontWeight: 600,
+                  fontWeight: 700,
+                  color: '#fff',
                   '&:hover': {
-                    transform: 'translateX(-4px)'
+                    transform: 'translateX(-4px)',
+                    bgcolor: 'rgba(255,255,255,0.1)'
                   },
                   transition: 'all 0.3s ease'
                 }}
@@ -341,17 +379,20 @@ function Register({ setIsAuthenticated }) {
                   size="large"
                   sx={{ 
                     px: 4,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    fontWeight: 600,
+                    bgcolor: '#00ff88',
+                    color: '#000',
+                    fontWeight: 700,
+                    fontSize: '1.1rem',
+                    boxShadow: '0 0 20px rgba(0,255,136,0.4)',
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                      bgcolor: '#00cc6a',
                       transform: 'translateX(4px)',
-                      boxShadow: '0 8px 24px rgba(102,126,234,0.4)'
+                      boxShadow: '0 0 30px rgba(0,255,136,0.6)'
                     },
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Create Account'}
+                  {loading ? <CircularProgress size={24} sx={{ color: '#000' }} /> : 'Create Account'}
                 </Button>
               ) : (
                 <Button 
@@ -360,12 +401,15 @@ function Register({ setIsAuthenticated }) {
                   size="large"
                   sx={{ 
                     px: 4,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    fontWeight: 600,
+                    bgcolor: '#00ff88',
+                    color: '#000',
+                    fontWeight: 700,
+                    fontSize: '1.1rem',
+                    boxShadow: '0 0 20px rgba(0,255,136,0.4)',
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                      bgcolor: '#00cc6a',
                       transform: 'translateX(4px)',
-                      boxShadow: '0 8px 24px rgba(102,126,234,0.4)'
+                      boxShadow: '0 0 30px rgba(0,255,136,0.6)'
                     },
                     transition: 'all 0.3s ease'
                   }}
@@ -377,14 +421,14 @@ function Register({ setIsAuthenticated }) {
             
             <Divider sx={{ my: 3 }} />
             
-            <Typography align="center" variant="body2" color="text.secondary">
+            <Typography align="center" variant="body2" sx={{ color: '#fff', opacity: 0.8 }}>
               Already have an account?{' '}
               <Link 
                 to="/login" 
                 style={{ 
-                  color: '#667eea',
+                  color: '#00ff88',
                   textDecoration: 'none',
-                  fontWeight: 600
+                  fontWeight: 700
                 }}
               >
                 Sign In
