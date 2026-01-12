@@ -1,27 +1,64 @@
 # DigitalOcean App Platform Deployment Guide
 
-## Quick Fix for "No Components Detected" Error
+## CRITICAL: How to Fix "No Components Detected" Error
 
-### Option 1: Use the App Spec File (Recommended)
-I've created a `.do/app.yaml` file in your repository. Use it:
+Your app components are in subdirectories (`/frontend` and `/backend`), not the root. Follow these EXACT steps:
 
-1. In DigitalOcean dashboard, instead of letting it auto-detect, choose **"Use App Spec"**
-2. Upload or paste the contents from `.do/app.yaml`
-3. Click **"Next"** to proceed with deployment
+### SOLUTION: Specify Source Directory in UI
 
-### Option 2: Manual Source Directory Configuration
+**Step-by-step in DigitalOcean UI:**
 
-If you prefer manual setup:
+1. Go to https://cloud.digitalocean.com/apps/new
+2. Click **"GitHub"** → Select your repository: `BTech20/biometric-auth-system`
+3. Click **"Next"**
+4. **IMPORTANT**: You'll see "No components detected" - **DON'T PANIC!**
+5. Look for the **"Source Directory (Optional)"** field
+6. Click **"Edit"** or the text field
+7. Type: `frontend` (without slashes)
+8. Click **"Next"** or **"Add Component"**
+9. DigitalOcean will now detect the React app!
+10. Click **"Add Component"** again for backend
+11. Set **Source Directory** to: `backend`
+12. DigitalOcean will detect the Python app!
+
+### Alternative: Use App Spec YAML
+
+If the UI method doesn't work:
+
+1. In DigitalOcean, click **"Edit Your App Spec"** or **"Import from Repository"**
+2. Look for the `.do/app.yaml` file in your repo (I've already created it)
+3. Or manually paste this:
+
+```yaml
+name: biometric-auth-system
+services:
+  - name: frontend
+    source_dir: /frontend
+    github:
+      repo: BTech20/biometric-auth-system
+      branch: main
+    build_command: npm install && npm run build
+    run_command: npx serve -s build -l $PORT
+  - name: backend
+    source_dir: /backend
+    github:
+      repo: BTech20/biometric-auth-system
+      branch: main
+    build_command: pip install -r requirements.txt
+    run_command: gunicorn --bind 0.0.0.0:$PORT App:app
+```
+
+### Component Configuration Reference
 
 #### Frontend Component:
-- **Source Directory**: `/frontend`
+- **Source Directory**: `frontend` (NO leading slash in UI!)
 - **Build Command**: `npm install && npm run build`
 - **Run Command**: `npx serve -s build -l $PORT`
 - **Environment**: Node.js
 - **HTTP Port**: 3000
 
 #### Backend Component:
-- **Source Directory**: `/backend`
+- **Source Directory**: `backend` (NO leading slash in UI!)
 - **Build Command**: `pip install -r requirements.txt`
 - **Run Command**: `gunicorn --bind 0.0.0.0:$PORT App:app`
 - **Environment**: Python
