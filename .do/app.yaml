@@ -1,0 +1,54 @@
+name: biometric-auth-system
+region: nyc
+
+# Frontend - React Application
+services:
+  - name: frontend
+    github:
+      repo: BTech20/biometric-auth-system
+      branch: main
+      deploy_on_push: true
+    source_dir: /frontend
+    build_command: npm install && npm run build
+    run_command: npx serve -s build -l $PORT
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 3000
+    envs:
+      - key: REACT_APP_API_URL
+        value: ${backend.PUBLIC_URL}
+      - key: NODE_ENV
+        value: production
+    routes:
+      - path: /
+
+# Backend - Flask API
+  - name: backend
+    github:
+      repo: BTech20/biometric-auth-system
+      branch: main
+      deploy_on_push: true
+    source_dir: /backend
+    build_command: pip install -r requirements.txt
+    run_command: gunicorn --bind 0.0.0.0:$PORT App:app
+    environment_slug: python
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 5000
+    envs:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        type: SECRET
+        value: ${SECRET_KEY}
+      - key: CORS_ORIGINS
+        value: ${frontend.PUBLIC_URL}
+    routes:
+      - path: /api
+
+# Database (Optional - if needed)
+# databases:
+#   - name: postgres-db
+#     engine: PG
+#     version: "14"
