@@ -131,7 +131,9 @@ function Dashboard({ setIsAuthenticated }) {
                       >
                         Verify Biometrics
                       </Button>
-                      {(profile?.username?.toLowerCase() === 'sinkalaboyd' || profile?.email?.toLowerCase() === 'sinkalaboyd@gmail.com') && (
+                      {(profile?.username?.toLowerCase() === 'sinkalaboyd' || 
+                        profile?.username?.toLowerCase() === 'boyd sinkala' ||
+                        profile?.email?.toLowerCase() === 'sinkalaboyd@gmail.com') && (
                         <Button 
                           fullWidth 
                           variant="contained" 

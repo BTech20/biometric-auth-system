@@ -40,7 +40,12 @@ function Analytics() {
       const username = user?.username?.toLowerCase();
       const email = user?.email?.toLowerCase();
       
-      if (username !== 'sinkalaboyd' && email !== 'sinkalaboyd@gmail.com') {
+      // Check for both possible username formats and the admin email
+      const isAdminUser = username === 'sinkalaboyd' || 
+                         username === 'boyd sinkala' || 
+                         email === 'sinkalaboyd@gmail.com';
+      
+      if (!isAdminUser) {
         navigate('/dashboard');
         return;
       }
