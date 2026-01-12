@@ -90,11 +90,11 @@ graph LR
 ```mermaid
 graph TB
     A[Flask App] --> B[Blueprints/Routes]
-    B --> C[/api/register]
-    B --> D[/api/login]
-    B --> E[/api/verify]
-    B --> F[/api/profile]
-    B --> G[/api/stats]
+    B --> C["POST /api/register"]
+    B --> D["POST /api/login"]
+    B --> E["POST /api/verify"]
+    B --> F["GET /api/profile"]
+    B --> G["GET /api/stats"]
     
     C --> H[Authentication Controller]
     D --> H
