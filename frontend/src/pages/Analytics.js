@@ -9,7 +9,7 @@ import {
 import { 
   ArrowBack, TrendingUp, TrendingDown, Assessment, 
   Security, Speed, CheckCircle, Settings, Save, GetApp,
-  ShowChart, BarChart, Timeline, GridOn as HeatmapIcon
+  ShowChart, BarChart, Timeline, GridOn as HeatmapIcon, Compare
 } from '@mui/icons-material';
 import { 
   LineChart, Line, AreaChart, Area, BarChart as ReBarChart, Bar,
@@ -171,11 +171,48 @@ function Analytics() {
     return data;
   };
 
+  // Generate comparative analysis data (face vs fingerprint)
+  const generateComparativeData = () => {
+    const metrics = [
+      { 
+        metric: 'Accuracy', 
+        face: 94.5 + Math.random() * 2, 
+        fingerprint: 96.8 + Math.random() * 1.5 
+      },
+      { 
+        metric: 'FAR', 
+        face: 2.8 + Math.random() * 0.5, 
+        fingerprint: 1.9 + Math.random() * 0.4 
+      },
+      { 
+        metric: 'FRR', 
+        face: 2.7 + Math.random() * 0.6, 
+        fingerprint: 1.3 + Math.random() * 0.3 
+      },
+      { 
+        metric: 'EER', 
+        face: 2.75 + Math.random() * 0.3, 
+        fingerprint: 1.6 + Math.random() * 0.2 
+      },
+      { 
+        metric: 'Speed (ms)', 
+        face: 180 + Math.random() * 20, 
+        fingerprint: 120 + Math.random() * 15 
+      }
+    ];
+    return metrics.map(m => ({
+      ...m,
+      face: parseFloat(m.face.toFixed(2)),
+      fingerprint: parseFloat(m.fingerprint.toFixed(2))
+    }));
+  };
+
   const metrics = calculateMetrics();
   const rocData = generateROCData();
   const timeSeriesData = generateTimeSeriesData();
   const distanceData = generateDistanceDistribution();
   const detData = generateDETData();
+  const comparativeData = generateComparativeData();
 
   if (loading) {
     return (
@@ -379,14 +416,143 @@ function Analytics() {
                     '& .MuiTabs-indicator': { bgcolor: '#2196f3' }
                   }}
                 >
+                  <Tab label="Comparative Analysis" icon={<Compare />} iconPosition="start" />
                   <Tab label="ROC Curve" icon={<ShowChart />} iconPosition="start" />
                   <Tab label="Time Series" icon={<Timeline />} iconPosition="start" />
                   <Tab label="DET Curve" icon={<BarChart />} iconPosition="start" />
                   <Tab label="Distance Distribution" icon={<HeatmapIcon />} iconPosition="start" />
                 </Tabs>
 
-                {/* ROC Curve */}
+                {/* Comparative Analysis - Face vs Fingerprint */}
                 {activeTab === 0 && (
+                  <Fade in>
+                    <Box>
+                      <Typography variant="h6" sx={{ color: '#fff', mb: 2 }}>
+                        Comparative Performance Analysis: Face vs Fingerprint
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#aaa', mb: 3 }}>
+                        Side-by-side comparison of biometric modalities for accuracy, error rates, and processing speed
+                      </Typography>
+                      
+                      <Grid container spacing={3} sx={{ mb: 4 }}>
+                        <Grid item xs={12} md={6}>
+                          <Card sx={{ bgcolor: '#0a0a0a', border: '2px solid #2196f3', p: 3, height: '100%' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                              <Box sx={{ 
+                                p: 1.5, 
+                                borderRadius: 2, 
+                                bgcolor: '#2196f330',
+                                color: '#2196f3',
+                                mr: 2
+                              }}>
+                                <Security sx={{ fontSize: 32 }} />
+                              </Box>
+                              <Typography variant="h5" sx={{ fontWeight: 700, color: '#2196f3' }}>
+                                Face Recognition
+                              </Typography>
+                            </Box>
+                            <Divider sx={{ mb: 2, bgcolor: '#333' }} />
+                            <Grid container spacing={2}>
+                              <Grid item xs={6}>
+                                <Typography variant="body2" sx={{ color: '#aaa' }}>Accuracy</Typography>
+                                <Typography variant="h5" sx={{ color: '#4caf50', fontWeight: 700 }}>
+                                  {comparativeData[0]?.face}%
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Typography variant="body2" sx={{ color: '#aaa' }}>FAR</Typography>
+                                <Typography variant="h5" sx={{ color: '#ff9800', fontWeight: 700 }}>
+                                  {comparativeData[1]?.face}%
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Typography variant="body2" sx={{ color: '#aaa' }}>FRR</Typography>
+                                <Typography variant="h5" sx={{ color: '#ff4444', fontWeight: 700 }}>
+                                  {comparativeData[2]?.face}%
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Typography variant="body2" sx={{ color: '#aaa' }}>Speed</Typography>
+                                <Typography variant="h5" sx={{ color: '#9c27b0', fontWeight: 700 }}>
+                                  {comparativeData[4]?.face} ms
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Card>
+                        </Grid>
+                        
+                        <Grid item xs={12} md={6}>
+                          <Card sx={{ bgcolor: '#0a0a0a', border: '2px solid #00ff88', p: 3, height: '100%' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                              <Box sx={{ 
+                                p: 1.5, 
+                                borderRadius: 2, 
+                                bgcolor: '#00ff8830',
+                                color: '#00ff88',
+                                mr: 2
+                              }}>
+                                <Security sx={{ fontSize: 32 }} />
+                              </Box>
+                              <Typography variant="h5" sx={{ fontWeight: 700, color: '#00ff88' }}>
+                                Fingerprint Recognition
+                              </Typography>
+                            </Box>
+                            <Divider sx={{ mb: 2, bgcolor: '#333' }} />
+                            <Grid container spacing={2}>
+                              <Grid item xs={6}>
+                                <Typography variant="body2" sx={{ color: '#aaa' }}>Accuracy</Typography>
+                                <Typography variant="h5" sx={{ color: '#4caf50', fontWeight: 700 }}>
+                                  {comparativeData[0]?.fingerprint}%
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Typography variant="body2" sx={{ color: '#aaa' }}>FAR</Typography>
+                                <Typography variant="h5" sx={{ color: '#ff9800', fontWeight: 700 }}>
+                                  {comparativeData[1]?.fingerprint}%
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Typography variant="body2" sx={{ color: '#aaa' }}>FRR</Typography>
+                                <Typography variant="h5" sx={{ color: '#ff4444', fontWeight: 700 }}>
+                                  {comparativeData[2]?.fingerprint}%
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Typography variant="body2" sx={{ color: '#aaa' }}>Speed</Typography>
+                                <Typography variant="h5" sx={{ color: '#9c27b0', fontWeight: 700 }}>
+                                  {comparativeData[4]?.fingerprint} ms
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Card>
+                        </Grid>
+                      </Grid>
+
+                      <ResponsiveContainer width="100%" height={400}>
+                        <ReBarChart data={comparativeData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                          <XAxis dataKey="metric" stroke="#fff" />
+                          <YAxis stroke="#fff" label={{ value: 'Value', angle: -90, position: 'insideLeft', fill: '#fff' }} />
+                          <RechartsTooltip 
+                            contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #2196f3', borderRadius: 8 }}
+                            labelStyle={{ color: '#fff' }}
+                          />
+                          <Legend wrapperStyle={{ color: '#fff' }} />
+                          <Bar dataKey="face" name="Face Recognition" fill="#2196f3" />
+                          <Bar dataKey="fingerprint" name="Fingerprint Recognition" fill="#00ff88" />
+                        </ReBarChart>
+                      </ResponsiveContainer>
+                      
+                      <Alert severity="info" sx={{ mt: 3, bgcolor: '#0d47a1', color: '#fff' }}>
+                        <strong>Key Insights:</strong> Fingerprint recognition demonstrates higher accuracy and lower error rates, 
+                        while face recognition offers contactless convenience. Both modalities complement each other in multimodal authentication.
+                      </Alert>
+                    </Box>
+                  </Fade>
+                )}
+
+                {/* ROC Curve */}
+                {activeTab === 1 && (
                   <Fade in>
                     <Box>
                       <Typography variant="h6" sx={{ color: '#fff', mb: 2 }}>
@@ -425,7 +591,7 @@ function Analytics() {
                 )}
 
                 {/* Time Series */}
-                {activeTab === 1 && (
+                {activeTab === 2 && (
                   <Fade in>
                     <Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -485,7 +651,7 @@ function Analytics() {
                 )}
 
                 {/* DET Curve */}
-                {activeTab === 2 && (
+                {activeTab === 3 && (
                   <Fade in>
                     <Box>
                       <Typography variant="h6" sx={{ color: '#fff', mb: 2 }}>
@@ -524,7 +690,7 @@ function Analytics() {
                 )}
 
                 {/* Distance Distribution */}
-                {activeTab === 3 && (
+                {activeTab === 4 && (
                   <Fade in>
                     <Box>
                       <Typography variant="h6" sx={{ color: '#fff', mb: 2 }}>
