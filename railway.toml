@@ -1,0 +1,9 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "frontend/Dockerfile"
+watchPatterns = ["frontend/**"]
+
+[deploy]
+startCommand = "serve -s build -l $PORT"
+healthcheckPath = "/"
+healthcheckTimeout = 300
