@@ -2,7 +2,43 @@
 
 ## 🏗️ Overview
 
-The Biometric Authentication System follows a client-server architecture with a React frontend and Flask backend, utilizing deep learning models for biometric recognition.
+The Biometric Authentication System is a research-oriented multimodal biometric authentication platform that combines **face recognition** and **fingerprint recognition** using deep learning techniques. The system follows a modern **client-server architecture** with clear separation of concerns across multiple layers.
+
+### Architecture Philosophy
+
+The architecture is designed with the following principles:
+
+1. **Modularity**: Each component has a single, well-defined responsibility
+2. **Scalability**: Stateless design allows horizontal scaling of services
+3. **Security**: Defense-in-depth approach with multiple security layers
+4. **Flexibility**: Support for multiple biometric modalities and input methods
+5. **Performance**: Optimized deep learning pipeline with efficient hashing
+6. **Accessibility**: Cross-platform web interface accessible from desktop and mobile devices
+
+### Key Architectural Decisions
+
+**Client-Side Processing**
+- Image capture and quality checks performed in browser to reduce server load
+- Base64 encoding enables seamless transmission without file upload complexity
+- Real-time preview and validation improve user experience
+
+**Deep Hashing Approach**
+- 512-dimensional feature vectors compressed to 128-bit binary codes
+- Hamming distance enables O(1) similarity computation vs O(n) for Euclidean distance
+- Binary codes reduce storage from 2KB (float32) to 16 bytes per template
+- Configurable threshold (5-50) allows tuning for security vs usability
+
+**Multimodal Fusion**
+- Separate ResNet models (ResNet50 for face, ResNet18 for fingerprint) optimize for each modality
+- Score-level fusion averages Hamming distances for final decision
+- Multimodal approach significantly reduces False Accept Rate (FAR) and False Reject Rate (FRR)
+
+**Stateless Authentication**
+- JWT tokens eliminate server-side session storage
+- Enables horizontal scaling without sticky sessions
+- 24-hour token expiry balances security and convenience
+
+The system processes biometric data through a seven-layer architecture, from client capture to persistent storage, with security controls applied at each layer.
 
 ## 📊 High-Level Architecture
 
