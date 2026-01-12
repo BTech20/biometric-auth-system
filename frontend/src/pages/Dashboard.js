@@ -131,30 +131,32 @@ function Dashboard({ setIsAuthenticated }) {
                       >
                         Verify Biometrics
                       </Button>
-                      <Button 
-                        fullWidth 
-                        variant="contained" 
-                        size="large"
-                        startIcon={<ShowChart sx={{ fontSize: 28 }} />} 
-                        onClick={() => navigate('/analytics')} 
-                        sx={{ 
-                          bgcolor: '#ff9800',
-                          color: '#000',
-                          py: 2,
-                          fontSize: '1.1rem',
-                          fontWeight: 800,
-                          border: '2px solid #ff9800',
-                          boxShadow: '0 4px 20px rgba(255,152,0,0.4)',
-                          '&:hover': { 
-                            bgcolor: '#f57c00',
-                            transform: 'translateY(-4px)',
-                            boxShadow: '0 8px 30px rgba(255,152,0,0.6)'
-                          },
-                          transition: 'all 0.3s ease'
-                        }}
-                      >
-                        View Analytics
-                      </Button>
+                      {(profile?.username?.toLowerCase() === 'sinkalaboyd' || profile?.email?.toLowerCase() === 'sinkalaboyd@gmail.com') && (
+                        <Button 
+                          fullWidth 
+                          variant="contained" 
+                          size="large"
+                          startIcon={<ShowChart sx={{ fontSize: 28 }} />} 
+                          onClick={() => navigate('/analytics')} 
+                          sx={{ 
+                            bgcolor: '#ff9800',
+                            color: '#000',
+                            py: 2,
+                            fontSize: '1.1rem',
+                            fontWeight: 800,
+                            border: '2px solid #ff9800',
+                            boxShadow: '0 4px 20px rgba(255,152,0,0.4)',
+                            '&:hover': { 
+                              bgcolor: '#f57c00',
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 8px 30px rgba(255,152,0,0.6)'
+                            },
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          System Analytics & Evaluation
+                        </Button>
+                      )}
                     </Box>
                   </CardContent>
                 </Card>

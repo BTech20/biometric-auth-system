@@ -9,7 +9,7 @@ import {
 import { 
   ArrowBack, TrendingUp, TrendingDown, Assessment, 
   Security, Speed, CheckCircle, Settings, Save, GetApp,
-  ShowChart, BarChart, Timeline, Heatmap as HeatmapIcon
+  ShowChart, BarChart, Timeline, GridOn as HeatmapIcon
 } from '@mui/icons-material';
 import { 
   LineChart, Line, AreaChart, Area, BarChart as ReBarChart, Bar,
@@ -27,10 +27,28 @@ function Analytics() {
   const [message, setMessage] = useState('');
   const [activeTab, setActiveTab] = useState(0);
   const [timeRange, setTimeRange] = useState('week');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    checkAdminAccess();
     loadAnalytics();
   }, []);
+
+  const checkAdminAccess = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const username = user?.username?.toLowerCase();
+      const email = user?.email?.toLowerCase();
+      
+      if (username !== 'sinkalaboyd' && email !== 'sinkalaboyd@gmail.com') {
+        navigate('/dashboard');
+        return;
+      }
+      setIsAdmin(true);
+    } catch (err) {
+      navigate('/dashboard');
+    }
+  };
 
   const loadAnalytics = async () => {
     try {
@@ -624,7 +642,17 @@ function Analytics() {
                       value={tempThreshold}
                       onChange={(e) => setTempThreshold(Math.max(5, Math.min(50, parseInt(e.target.value) || 5)))}
                       inputProps={{ min: 5, max: 50 }}
-                      sx={{ mb: 2 }}
+                      sx={{ 
+                        mb: 2,
+                        '& .MuiInputBase-input': { color: '#fff', fontWeight: 600, fontSize: '1.1rem' },
+                        '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)', fontWeight: 500 },
+                        '& .MuiInputLabel-root.Mui-focused': { color: '#ff9800' },
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+                          '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
+                          '&.Mui-focused fieldset': { borderColor: '#ff9800' }
+                        }
+                      }}
                     />
                     <Button
                       fullWidth

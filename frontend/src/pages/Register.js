@@ -131,9 +131,19 @@ function Register({ setIsAuthenticated }) {
                     value={username} 
                     onChange={(e) => setUsername(e.target.value)}
                     InputProps={{ 
-                      startAdornment: <InputAdornment position="start"><Person color="action" /></InputAdornment> 
+                      startAdornment: <InputAdornment position="start"><Person sx={{ color: 'rgba(255,255,255,0.7)' }} /></InputAdornment> 
                     }}
-                    sx={{ mb: 2 }}
+                    sx={{ 
+                      mb: 2,
+                      '& .MuiInputBase-input': { color: '#fff', fontWeight: 500 },
+                      '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' },
+                      '& .MuiInputLabel-root.Mui-focused': { color: '#00ff88' },
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+                        '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
+                        '&.Mui-focused fieldset': { borderColor: '#00ff88' }
+                      }
+                    }}
                   />
                   <TextField 
                     fullWidth 
@@ -143,9 +153,19 @@ function Register({ setIsAuthenticated }) {
                     value={email} 
                     onChange={(e) => setEmail(e.target.value)}
                     InputProps={{ 
-                      startAdornment: <InputAdornment position="start"><Email color="action" /></InputAdornment> 
+                      startAdornment: <InputAdornment position="start"><Email sx={{ color: 'rgba(255,255,255,0.7)' }} /></InputAdornment> 
                     }}
-                    sx={{ mb: 2 }}
+                    sx={{ 
+                      mb: 2,
+                      '& .MuiInputBase-input': { color: '#fff', fontWeight: 500 },
+                      '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' },
+                      '& .MuiInputLabel-root.Mui-focused': { color: '#00ff88' },
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+                        '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
+                        '&.Mui-focused fieldset': { borderColor: '#00ff88' }
+                      }
+                    }}
                   />
                   <TextField 
                     fullWidth 
@@ -155,14 +175,24 @@ function Register({ setIsAuthenticated }) {
                     value={password} 
                     onChange={(e) => setPassword(e.target.value)}
                     InputProps={{ 
-                      startAdornment: <InputAdornment position="start"><Lock color="action" /></InputAdornment>,
+                      startAdornment: <InputAdornment position="start"><Lock sx={{ color: 'rgba(255,255,255,0.7)' }} /></InputAdornment>,
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: 'rgba(255,255,255,0.7)' }}>
                             {showPassword ? <VisibilityOff /> : <Visibility />}
                           </IconButton>
                         </InputAdornment>
                       )
+                    }}
+                    sx={{ 
+                      '& .MuiInputBase-input': { color: '#fff', fontWeight: 500 },
+                      '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' },
+                      '& .MuiInputLabel-root.Mui-focused': { color: '#00ff88' },
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+                        '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
+                        '&.Mui-focused fieldset': { borderColor: '#00ff88' }
+                      }
                     }}
                   />
                 </Box>
@@ -172,7 +202,20 @@ function Register({ setIsAuthenticated }) {
           {activeStep === 1 && (
             <>
               {!showWebcam && !faceImage && (
-                <ButtonGroup fullWidth variant="outlined" sx={{ mb: 2 }}>
+                <ButtonGroup fullWidth variant="outlined" sx={{ 
+                  mb: 2,
+                  '& .MuiButton-root': {
+                    color: 'rgba(255,255,255,0.9)',
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    fontWeight: 600,
+                    py: 1.5,
+                    '&:hover': { 
+                      borderColor: '#00ff88', 
+                      bgcolor: 'rgba(0,255,136,0.1)',
+                      color: '#00ff88'
+                    }
+                  }
+                }}>
                   <Button startIcon={<CameraAlt />} onClick={() => setShowWebcam(true)}>Capture Face</Button>
                   <Button startIcon={<Upload />} onClick={() => faceUploadRef.current.click()}>Upload Image</Button>
                 </ButtonGroup>
@@ -219,7 +262,19 @@ function Register({ setIsAuthenticated }) {
                 <Box sx={{ mb: 2 }}>
                   <img src={faceImage} alt="Face" style={{ width: '100%', borderRadius: 8 }} />
                   <ImageQualityCheck imageData={faceImage} />
-                  <ButtonGroup fullWidth sx={{ mt: 1 }}>
+                  <ButtonGroup fullWidth sx={{ 
+                    mt: 1,
+                    '& .MuiButton-root': {
+                      color: 'rgba(255,255,255,0.9)',
+                      borderColor: 'rgba(255,255,255,0.3)',
+                      fontWeight: 600,
+                      '&:hover': { 
+                        borderColor: '#00ff88', 
+                        bgcolor: 'rgba(0,255,136,0.1)',
+                        color: '#00ff88'
+                      }
+                    }
+                  }}>
                     <Button startIcon={<CameraAlt />} onClick={() => { setFaceImage(null); setShowWebcam(true); }}>Recapture</Button>
                     <Button startIcon={<Upload />} onClick={() => { setFaceImage(null); faceUploadRef.current.click(); }}>Reupload</Button>
                   </ButtonGroup>
@@ -242,29 +297,32 @@ function Register({ setIsAuthenticated }) {
               
               {!useHardwareScanner && !showFpWebcam && !fingerprintImage && (
                 <>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'center' }}>
+                  <Typography variant="body2" sx={{ mb: 1, textAlign: 'center', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>
                     Choose how to capture your thumbprint:
                   </Typography>
-                  <ButtonGroup fullWidth variant="outlined" sx={{ mb: 2 }}>
+                  <ButtonGroup fullWidth variant="outlined" sx={{ 
+                    mb: 2,
+                    '& .MuiButton-root': {
+                      color: 'rgba(255,255,255,0.9)',
+                      borderColor: 'rgba(255,255,255,0.3)',
+                      py: 1.5,
+                      fontWeight: 600,
+                      '&:hover': { 
+                        borderColor: '#00ff88',
+                        bgcolor: 'rgba(0,255,136,0.1)',
+                        color: '#00ff88'
+                      }
+                    }
+                  }}>
                     <Button 
                       startIcon={<CameraAlt />} 
                       onClick={() => setShowFpWebcam(true)}
-                      sx={{ 
-                        py: 1.5,
-                        fontWeight: 600,
-                        '&:hover': { bgcolor: 'rgba(102,126,234,0.1)' }
-                      }}
                     >
                       Open Camera
                     </Button>
                     <Button 
                       startIcon={<Upload />} 
                       onClick={() => fpUploadRef.current.click()}
-                      sx={{ 
-                        py: 1.5,
-                        fontWeight: 600,
-                        '&:hover': { bgcolor: 'rgba(102,126,234,0.1)' }
-                      }}
                     >
                       Upload Image
                     </Button>
@@ -330,7 +388,19 @@ function Register({ setIsAuthenticated }) {
                   <Box sx={{ mb: 2 }}>
                     <img src={fingerprintImage} alt="Fingerprint" style={{ width: '100%', borderRadius: 8 }} />
                     <ImageQualityCheck imageData={fingerprintImage} />
-                    <ButtonGroup fullWidth sx={{ mt: 1 }}>
+                    <ButtonGroup fullWidth sx={{ 
+                      mt: 1,
+                      '& .MuiButton-root': {
+                        color: 'rgba(255,255,255,0.9)',
+                        borderColor: 'rgba(255,255,255,0.3)',
+                        fontWeight: 600,
+                        '&:hover': { 
+                          borderColor: '#00ff88', 
+                          bgcolor: 'rgba(0,255,136,0.1)',
+                          color: '#00ff88'
+                        }
+                      }
+                    }}>
                       <Button onClick={() => { setFingerprintImage(null); }}>Rescan</Button>
                       {!useHardwareScanner && (
                         <Button startIcon={<Upload />} onClick={() => { setFingerprintImage(null); fpUploadRef.current.click(); }}>Reupload</Button>
@@ -340,7 +410,7 @@ function Register({ setIsAuthenticated }) {
                 </Fade>
               )}
               
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 2, borderColor: 'rgba(255,255,255,0.2)' }} />
               <Button 
                 fullWidth 
                 variant="text" 
@@ -419,7 +489,7 @@ function Register({ setIsAuthenticated }) {
               )}
             </Box>
             
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 3, borderColor: 'rgba(255,255,255,0.2)' }} />
             
             <Typography align="center" variant="body2" sx={{ color: '#fff', opacity: 0.8 }}>
               Already have an account?{' '}

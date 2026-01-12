@@ -70,7 +70,7 @@ function Login({ setIsAuthenticated }) {
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      bgcolor: '#0a0a0a',
       py: 4
     }}>
       <Container maxWidth="sm">
@@ -78,24 +78,24 @@ function Login({ setIsAuthenticated }) {
           <Paper sx={{ 
             p: 4, 
             borderRadius: 4,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-            background: 'rgba(255,255,255,0.95)',
-            backdropFilter: 'blur(10px)'
+            boxShadow: '0 8px 32px rgba(0,255,136,0.3)',
+            bgcolor: '#1a1a1a',
+            border: '2px solid #00ff88'
           }}>
             <Box sx={{ textAlign: 'center', mb: 3 }}>
               <Box sx={{ 
                 display: 'inline-flex',
                 p: 2,
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #00ff88 0%, #00cc6a 100%)',
                 mb: 2
               }}>
-                <Fingerprint sx={{ fontSize: 50, color: 'white' }} />
+                <Fingerprint sx={{ fontSize: 50, color: '#000' }} />
               </Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#333', mb: 1 }}>
-                Welcome Back
+              <Typography variant="h4" sx={{ fontWeight: 800, color: '#00ff88', mb: 1 }}>
+                Authentication
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: '#fff', opacity: 0.8 }}>
                 Secure biometric authentication system
               </Typography>
             </Box>
@@ -115,9 +115,23 @@ function Login({ setIsAuthenticated }) {
               sx={{
                 mb: 2,
                 '& .MuiTab-root': {
+                  color: '#fff',
                   fontWeight: 600,
                   textTransform: 'none',
-                  fontSize: '1rem'
+                  fontSize: '1rem',
+                  '&.Mui-selected': {
+                    color: '#2196f3'
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: '#fff'
+                  },
+                  '&.Mui-selected .MuiSvgIcon-root': {
+                    color: '#2196f3'
+                  }
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#2196f3',
+                  height: 3
                 }
               }}
             >
@@ -135,9 +149,19 @@ function Login({ setIsAuthenticated }) {
                   onChange={(e) => setUsername(e.target.value)} 
                   required 
                   InputProps={{ 
-                    startAdornment: <InputAdornment position="start"><Person color="action" /></InputAdornment> 
+                    startAdornment: <InputAdornment position="start"><Person sx={{ color: '#fff' }} /></InputAdornment> 
                   }}
-                  sx={{ mb: 2 }}
+                  sx={{ 
+                    mb: 2,
+                    '& .MuiInputBase-input': { color: '#fff', fontWeight: 500 },
+                    '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' },
+                    '& .MuiInputLabel-root.Mui-focused': { color: '#00ff88' },
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+                      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
+                      '&.Mui-focused fieldset': { borderColor: '#00ff88' }
+                    }
+                  }}
                 />
                 <TextField 
                   fullWidth 
@@ -148,14 +172,24 @@ function Login({ setIsAuthenticated }) {
                   onChange={(e) => setPassword(e.target.value)} 
                   required 
                   InputProps={{ 
-                    startAdornment: <InputAdornment position="start"><Lock color="action" /></InputAdornment>,
+                    startAdornment: <InputAdornment position="start"><Lock sx={{ color: '#fff' }} /></InputAdornment>,
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: 'rgba(255,255,255,0.7)' }}>
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
                     )
+                  }}
+                  sx={{ 
+                    '& .MuiInputBase-input': { color: '#fff', fontWeight: 500 },
+                    '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' },
+                    '& .MuiInputLabel-root.Mui-focused': { color: '#00ff88' },
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+                      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
+                      '&.Mui-focused fieldset': { borderColor: '#00ff88' }
+                    }
                   }}
                 />
                 <Button 
@@ -166,27 +200,46 @@ function Login({ setIsAuthenticated }) {
                   sx={{ 
                     mt: 3,
                     py: 1.5,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    fontWeight: 600,
-                    fontSize: '1rem',
+                    bgcolor: '#00ff88',
+                    color: '#000',
+                    fontWeight: 700,
+                    fontSize: '1.1rem',
+                    boxShadow: '0 0 20px rgba(0,255,136,0.4)',
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                      bgcolor: '#00cc6a',
                       transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 24px rgba(102,126,234,0.4)'
+                      boxShadow: '0 0 30px rgba(0,255,136,0.6)'
                     },
                     transition: 'all 0.3s ease'
                   }} 
                   disabled={loading}
                 >
-                  {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Sign In'}
+                  {loading ? <CircularProgress size={24} sx={{ color: '#000' }} /> : 'Sign In'}
                 </Button>
               </form>
             </TabPanel>
           
           <TabPanel value={tabValue} index={1}>
-            <Typography variant="h6" sx={{ mb: 2 }}>1. Face Verification</Typography>
+            <Typography variant="h6" sx={{ mb: 2, color: '#fff', fontWeight: 700, fontSize: '1.1rem' }}>1. Face Verification</Typography>
             {!showWebcam && !faceImage && (
-              <ButtonGroup fullWidth variant="outlined" sx={{ mb: 2 }}>
+              <ButtonGroup fullWidth variant="outlined" sx={{ 
+                mb: 2,
+                '& .MuiButton-root': {
+                  color: '#2196f3',
+                  borderColor: '#2196f3',
+                  fontWeight: 600,
+                  py: 1.5,
+                  '&:hover': { 
+                    borderColor: '#1976d2',
+                    bgcolor: 'rgba(33,150,243,0.1)',
+                    transform: 'translateY(-2px)'
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: '#2196f3'
+                  }
+                },
+                transition: 'all 0.3s ease'
+              }}>
                 <Button startIcon={<CameraAlt />} onClick={() => setShowWebcam(true)}>Capture Face</Button>
                 <Button startIcon={<Upload />} onClick={() => faceUploadRef.current.click()}>Upload Image</Button>
               </ButtonGroup>
@@ -203,22 +256,64 @@ function Login({ setIsAuthenticated }) {
               <Box sx={{ mb: 2 }}>
                 <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" width="100%" />
                 <ButtonGroup fullWidth sx={{ mt: 1 }}>
-                  <Button variant="contained" onClick={() => { setFaceImage(webcamRef.current.getScreenshot()); setShowWebcam(false); }}>Capture</Button>
-                  <Button variant="outlined" onClick={() => setShowWebcam(false)}>Cancel</Button>
+                  <Button 
+                    variant="contained" 
+                    onClick={() => { setFaceImage(webcamRef.current.getScreenshot()); setShowWebcam(false); }}
+                    sx={{
+                      bgcolor: '#00ff88',
+                      color: '#000',
+                      fontWeight: 700,
+                      py: 1.5,
+                      '&:hover': { bgcolor: '#00cc6a' }
+                    }}
+                  >
+                    Capture
+                  </Button>
+                  <Button 
+                    variant="outlined" 
+                    onClick={() => setShowWebcam(false)}
+                    sx={{ 
+                      color: '#ff4444',
+                      borderColor: '#ff4444',
+                      fontWeight: 600,
+                      py: 1.5,
+                      '&:hover': { 
+                        borderColor: '#cc0000', 
+                        bgcolor: 'rgba(255,68,68,0.1)' 
+                      }
+                    }}
+                  >
+                    Cancel
+                  </Button>
                 </ButtonGroup>
               </Box>
             )}
             {faceImage && !showWebcam && (
               <Box sx={{ mb: 2 }}>
                 <img src={faceImage} alt="Face" style={{ width: '100%', borderRadius: 8 }} />
-                <ButtonGroup fullWidth sx={{ mt: 1 }}>
+                <ButtonGroup fullWidth sx={{ 
+                  mt: 1,
+                  '& .MuiButton-root': {
+                    color: 'rgba(255,255,255,0.9)',
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    fontWeight: 600,
+                    '&:hover': { 
+                      borderColor: '#00ff88',
+                      bgcolor: 'rgba(0,255,136,0.1)',
+                      color: '#00ff88'
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: 'inherit'
+                    }
+                  }
+                }}>
                   <Button startIcon={<CameraAlt />} onClick={() => { setFaceImage(null); setShowWebcam(true); }}>Recapture</Button>
                   <Button startIcon={<Upload />} onClick={() => { setFaceImage(null); faceUploadRef.current.click(); }}>Reupload</Button>
                 </ButtonGroup>
               </Box>
             )}
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="h6" sx={{ mb: 2 }}>2. Fingerprint Verification</Typography>
+            <Divider sx={{ my: 2, borderColor: 'rgba(255,255,255,0.2)' }} />
+            <Typography variant="h6" sx={{ mb: 2, color: '#fff', fontWeight: 700, fontSize: '1.1rem' }}>2. Fingerprint Verification</Typography>
             
             {useHardwareScanner && !fingerprintImage && (
               <HardwareFingerprintScanner 
@@ -232,10 +327,27 @@ function Login({ setIsAuthenticated }) {
             
             {!useHardwareScanner && !showFpWebcam && !fingerprintImage && (
               <>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'center' }}>
+                <Typography variant="body2" sx={{ mb: 1, textAlign: 'center', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>
                   Choose how to capture your thumbprint:
                 </Typography>
-                <ButtonGroup fullWidth variant="outlined" sx={{ mb: 2 }}>
+                <ButtonGroup fullWidth variant="outlined" sx={{ 
+                  mb: 2,
+                  '& .MuiButton-root': {
+                    color: '#2196f3',
+                    borderColor: '#2196f3',
+                    py: 1.5,
+                    fontWeight: 600,
+                    '&:hover': { 
+                      borderColor: '#1976d2',
+                      bgcolor: 'rgba(33,150,243,0.1)',
+                      transform: 'translateY(-2px)'
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: '#2196f3'
+                    }
+                  },
+                  transition: 'all 0.3s ease'
+                }}>
                   <Button 
                     startIcon={<CameraAlt />} 
                     onClick={() => setShowFpWebcam(true)}
@@ -288,9 +400,13 @@ function Login({ setIsAuthenticated }) {
                           setShowFpWebcam(false); 
                         }}
                         sx={{
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          bgcolor: '#00ff88',
+                          color: '#000',
                           py: 1.5,
-                          fontWeight: 600
+                          fontWeight: 700,
+                          '&:hover': {
+                            bgcolor: '#00cc6a'
+                          }
                         }}
                       >
                         Capture Thumb
@@ -298,7 +414,16 @@ function Login({ setIsAuthenticated }) {
                       <Button 
                         variant="outlined" 
                         onClick={() => setShowFpWebcam(false)}
-                        sx={{ py: 1.5 }}
+                        sx={{ 
+                          py: 1.5,
+                          color: '#ff4444',
+                          borderColor: '#ff4444',
+                          fontWeight: 600,
+                          '&:hover': { 
+                            borderColor: '#cc0000', 
+                            bgcolor: 'rgba(255,68,68,0.1)' 
+                          }
+                        }}
                       >
                         Cancel
                       </Button>
@@ -312,7 +437,22 @@ function Login({ setIsAuthenticated }) {
               <Fade in={true}>
                 <Box sx={{ mb: 2 }}>
                   <img src={fingerprintImage} alt="Fingerprint" style={{ width: '100%', borderRadius: 8 }} />
-                  <ButtonGroup fullWidth sx={{ mt: 1 }}>
+                  <ButtonGroup fullWidth sx={{ 
+                    mt: 1,
+                    '& .MuiButton-root': {
+                      color: 'rgba(255,255,255,0.9)',
+                      borderColor: 'rgba(255,255,255,0.3)',
+                      fontWeight: 600,
+                      '&:hover': { 
+                        borderColor: '#00ff88',
+                        bgcolor: 'rgba(0,255,136,0.1)',
+                        color: '#00ff88'
+                      },
+                      '& .MuiSvgIcon-root': {
+                        color: 'inherit'
+                      }
+                    }
+                  }}>
                     <Button onClick={() => { setFingerprintImage(null); }}>Rescan</Button>
                     {!useHardwareScanner && (
                       <Button startIcon={<Upload />} onClick={() => { setFingerprintImage(null); fingerprintInputRef.current.click(); }}>Reupload</Button>
@@ -322,13 +462,13 @@ function Login({ setIsAuthenticated }) {
               </Fade>
             )}
             
-            <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 2, borderColor: 'rgba(255,255,255,0.2)' }} />
             <Button 
               fullWidth 
               variant="text" 
               size="small"
               onClick={() => setUseHardwareScanner(!useHardwareScanner)}
-              sx={{ mb: 2, color: '#667eea' }}
+              sx={{ mb: 2, color: '#00ff88', fontWeight: 600 }}
             >
               {useHardwareScanner ? '← Back to Camera/Upload' : '🔐 Use Dell Fingerprint Scanner (Requires Windows Hello)'}
             </Button>
@@ -341,31 +481,38 @@ function Login({ setIsAuthenticated }) {
               sx={{ 
                 mt: 3,
                 py: 1.5,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                fontWeight: 600,
-                fontSize: '1rem',
+                bgcolor: '#00ff88',
+                color: '#000',
+                fontWeight: 800,
+                fontSize: '1.1rem',
+                boxShadow: '0 0 20px rgba(0,255,136,0.4)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                  bgcolor: '#00cc6a',
                   transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 24px rgba(102,126,234,0.4)'
+                  boxShadow: '0 0 30px rgba(0,255,136,0.6)'
+                },
+                '&.Mui-disabled': {
+                  bgcolor: '#1a1a1a',
+                  color: 'rgba(255,255,255,0.3)',
+                  border: '1px solid rgba(255,255,255,0.1)'
                 },
                 transition: 'all 0.3s ease'
               }}
             >
-              {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Authenticate with Biometrics'}
+              {loading ? <CircularProgress size={24} sx={{ color: '#000' }} /> : 'Authenticate with Biometrics'}
             </Button>
           </TabPanel>
           
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 3, borderColor: 'rgba(255,255,255,0.2)' }} />
           
-          <Typography align="center" variant="body2" color="text.secondary">
+          <Typography align="center" variant="body2" sx={{ color: '#fff', opacity: 0.8 }}>
             Don't have an account?{' '}
             <Link 
               to="/register" 
               style={{ 
-                color: '#667eea',
+                color: '#00ff88',
                 textDecoration: 'none',
-                fontWeight: 600
+                fontWeight: 700
               }}
             >
               Create Account
