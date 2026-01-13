@@ -1,5 +1,6 @@
 # Backend Dockerfile
 FROM python:3.9-slim
+ENV CACHE_BUST=2026-01-13-v2
 
 WORKDIR /app
 
