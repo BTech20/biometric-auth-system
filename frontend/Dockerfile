@@ -1,5 +1,6 @@
 # Frontend Dockerfile
 FROM node:18-alpine AS build
+ENV CACHE_BUST=2026-01-13-fresh
 
 WORKDIR /app
 
