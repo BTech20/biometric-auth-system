@@ -29,5 +29,5 @@ COPY --from=build /app/build ./build
 # Expose port
 EXPOSE 3000
 
-# Start the app
+# Start the app - Fixed Railway deployment Jan 2026
 CMD sh -c "serve -s build -p ${PORT:-3000}"
