@@ -5,7 +5,6 @@
     "dockerfilePath": "backend/Dockerfile"
   },
   "deploy": {
-    "startCommand": "gunicorn --bind 0.0.0.0:$PORT App:app",
     "restartPolicyType": "ON_FAILURE"
   }
 }
