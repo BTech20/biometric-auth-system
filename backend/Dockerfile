@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Copy requirements - Updated Jan 2026 with gunicorn
 COPY requirements.txt .
 
 # Install Python dependencies
