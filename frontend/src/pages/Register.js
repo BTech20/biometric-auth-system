@@ -427,14 +427,22 @@ function Register({ setIsAuthenticated }) {
               <Button 
                 disabled={activeStep === 0} 
                 onClick={() => setActiveStep(activeStep - 1)}
+                variant="contained"
                 size="large"
                 sx={{ 
                   px: 4,
+                  bgcolor: '#00ff88',
+                  color: '#000',
                   fontWeight: 700,
-                  color: '#fff',
+                  fontSize: '1.1rem',
                   '&:hover': {
+                    bgcolor: '#00cc6a',
                     transform: 'translateX(-4px)',
-                    bgcolor: 'rgba(255,255,255,0.1)'
+                    boxShadow: '0 0 20px rgba(0,255,136,0.5)'
+                  },
+                  '&:disabled': {
+                    bgcolor: 'rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.3)'
                   },
                   transition: 'all 0.3s ease'
                 }}
