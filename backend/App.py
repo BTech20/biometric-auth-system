@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 import jwt
 
 app = Flask(__name__)
-CORS(app, resources={r'/api/*': {'origins': os.environ.get('CORS_ORIGINS', '*').split(',')}})
+CORS(app, resources={r'/*': {'origins': '*', 'methods': ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 'allow_headers': ['Content-Type', 'Authorization']}})
 
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///biometric_auth.db')
