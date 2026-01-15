@@ -23,6 +23,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:/
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+# Auto-create database tables on startup
+with app.app_context():
+    db.create_all()
+    print(' Database tables initialized')
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Database Models
@@ -315,9 +320,7 @@ def get_stats():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-with app.app_context():
-    db.create_all()
-    print("Database initialized")
-
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+
