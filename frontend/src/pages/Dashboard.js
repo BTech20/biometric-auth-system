@@ -216,6 +216,66 @@ function Dashboard({ setIsAuthenticated }) {
                     ))}
                   </Grid>
                   
+                  {/* System Statistics - Admin Only */}
+                  {stats?.system_stats && (
+                    <Slide direction="up" in timeout={1000}>
+                      <Box sx={{ mt: 4 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 800, mb: 3, color: '#ff9800', display: 'flex', alignItems: 'center' }}>
+                          <DashboardIcon sx={{ mr: 2, fontSize: 36 }} />
+                          System Statistics
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#999', mb: 3 }}>
+                          Overall system performance and usage metrics
+                        </Typography>
+                        <Grid container spacing={3}>
+                          {[
+                            { icon: <DashboardIcon sx={{ fontSize: 50 }} />, value: stats.system_stats.total_users, label: 'Total Users', color: '#00ff88', bg: 'rgba(0,255,136,0.1)' },
+                            { icon: <Person sx={{ fontSize: 50 }} />, value: stats.system_stats.active_users, label: 'Active Users', color: '#00ff88', bg: 'rgba(0,255,136,0.1)' },
+                            { icon: <Security sx={{ fontSize: 50 }} />, value: stats.system_stats.total_authentications, label: 'Total Auth', color: '#ff9800', bg: 'rgba(255,152,0,0.1)' },
+                            { icon: <Assessment sx={{ fontSize: 50 }} />, value: `${stats.system_stats.success_rate.toFixed(1)}%`, label: 'System Success Rate', color: '#2196f3', bg: 'rgba(33,150,243,0.1)' },
+                          ].map((stat, index) => (
+                            <Grid item xs={12} sm={6} key={index}>
+                              <Card sx={{ 
+                                height: '100%',
+                                bgcolor: '#1a1a1a',
+                                border: `2px solid ${stat.color}`,
+                                borderRadius: 3,
+                                boxShadow: `0 4px 20px ${stat.color}40`,
+                                transition: 'all 0.3s ease',
+                                '&:hover': { 
+                                  transform: 'translateY(-8px) scale(1.02)',
+                                  boxShadow: `0 12px 40px ${stat.color}60`
+                                }
+                              }}>
+                                <CardContent sx={{ p: 3 }}>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <Box>
+                                      <Typography variant="h3" sx={{ fontWeight: 800, color: stat.color, mb: 1 }}>
+                                        {stat.value}
+                                      </Typography>
+                                      <Typography variant="h6" sx={{ color: '#999', fontWeight: 600 }}>
+                                        {stat.label}
+                                      </Typography>
+                                    </Box>
+                                    <Box sx={{ 
+                                      p: 2, 
+                                      borderRadius: 3, 
+                                      bgcolor: stat.bg,
+                                      border: `2px solid ${stat.color}`,
+                                      color: stat.color
+                                    }}>
+                                      {stat.icon}
+                                    </Box>
+                                  </Box>
+                                </CardContent>
+                              </Card>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </Box>
+                    </Slide>
+                  )}
+                  
                   <Slide direction="up" in timeout={1200}>
                     <Card sx={{ 
                       mt: 4, 
