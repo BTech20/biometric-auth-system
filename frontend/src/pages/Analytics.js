@@ -96,19 +96,21 @@ function Analytics() {
 
   // Calculate metrics
   const calculateMetrics = () => {
-    if (!stats?.system_stats) return { far: 0, frr: 0, eer: 0, accuracy: 0 };
+    if (!stats?.system_stats) {
+      return { far: '0', frr: '0', eer: '0', accuracy: '0', errorRate: '0' };
+    }
     
     const total = stats.system_stats.total_authentications || 0;
     const successful = stats.system_stats.successful_authentications || 0;
     
-    // If no data yet, return placeholder values
+    // If no data yet, return placeholder values as strings
     if (total === 0) {
       return {
-        accuracy: 0,
-        errorRate: 0,
-        far: 0,
-        frr: 0,
-        eer: 0
+        accuracy: '0',
+        errorRate: '0',
+        far: '0',
+        frr: '0',
+        eer: '0'
       };
     }
     
@@ -322,7 +324,7 @@ function Analytics() {
               {[
                 { 
                   label: 'Accuracy', 
-                  value: (stats?.system_stats?.total_authentications > 0) 
+                  value: (stats?.system_stats?.total_authentications && stats.system_stats.total_authentications > 0) 
                     ? `${metrics.accuracy}%` 
                     : 'No Data',
                   icon: <CheckCircle />, 
@@ -331,7 +333,7 @@ function Analytics() {
                 },
                 { 
                   label: 'FAR', 
-                  value: (stats?.system_stats?.total_authentications > 0)
+                  value: (stats?.system_stats?.total_authentications && stats.system_stats.total_authentications > 0)
                     ? `${metrics.far}%` 
                     : 'No Data',
                   icon: <TrendingDown />, 
@@ -340,7 +342,7 @@ function Analytics() {
                 },
                 { 
                   label: 'FRR', 
-                  value: (stats?.system_stats?.total_authentications > 0)
+                  value: (stats?.system_stats?.total_authentications && stats.system_stats.total_authentications > 0)
                     ? `${metrics.frr}%` 
                     : 'No Data',
                   icon: <TrendingUp />, 
@@ -349,7 +351,7 @@ function Analytics() {
                 },
                 { 
                   label: 'EER', 
-                  value: (stats?.system_stats?.total_authentications > 0)
+                  value: (stats?.system_stats?.total_authentications && stats.system_stats.total_authentications > 0)
                     ? `${metrics.eer}%` 
                     : 'No Data',
                   icon: <Speed />, 
