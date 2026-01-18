@@ -286,9 +286,12 @@ function Dashboard({ setIsAuthenticated }) {
                       </Box>
                     </Slide>
                   )}
-                  </Grid>
+                </Box>
+              </Fade>
+            </Grid>
                   
-                  <Slide direction="up" in timeout={1200}>
+            <Grid item xs={12}>
+              <Slide direction="up" in timeout={1200}>
                     <Card sx={{ 
                       mt: 4, 
                       overflow: 'hidden',
