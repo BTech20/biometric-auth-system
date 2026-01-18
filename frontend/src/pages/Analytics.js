@@ -75,10 +75,10 @@ function Analytics() {
   const handleExportCSV = () => {
     const csvData = [
       ['Metric', 'Value'],
-      ['Total Users', stats?.total_users || 0],
-      ['Active Users', stats?.active_users || 0],
-      ['Total Authentications', stats?.total_authentications || 0],
-      ['Successful Authentications', stats?.successful_authentications || 0],
+      ['Total Users', stats?.system_stats?.total_users || 0],
+      ['Active Users', stats?.system_stats?.active_users || 0],
+      ['Total Authentications', stats?.system_stats?.total_authentications || 0],
+      ['Successful Authentications', stats?.system_stats?.successful_authentications || 0],
       ['Accuracy', `${metrics.accuracy}%`],
       ['FAR', `${metrics.far}%`],
       ['FRR', `${metrics.frr}%`],
@@ -888,7 +888,7 @@ function Analytics() {
                     <Card sx={{ bgcolor: '#0a0a0a', border: '2px solid #00ff88' }}>
                       <CardContent>
                         <Typography variant="h3" sx={{ fontWeight: 700, color: '#00ff88', mb: 1 }}>
-                          {stats?.total_users || 0}
+                          {stats?.system_stats?.total_users || 0}
                         </Typography>
                         <Typography variant="body1" sx={{ color: '#fff' }}>
                           Total Enrolled Users
@@ -900,7 +900,7 @@ function Analytics() {
                     <Card sx={{ bgcolor: '#0a0a0a', border: '2px solid #4caf50' }}>
                       <CardContent>
                         <Typography variant="h3" sx={{ fontWeight: 700, color: '#4caf50', mb: 1 }}>
-                          {stats?.active_users || 0}
+                          {stats?.system_stats?.active_users || 0}
                         </Typography>
                         <Typography variant="body1" sx={{ color: '#fff' }}>
                           Active Users
@@ -912,7 +912,7 @@ function Analytics() {
                     <Card sx={{ bgcolor: '#0a0a0a', border: '2px solid #ff9800' }}>
                       <CardContent>
                         <Typography variant="h3" sx={{ fontWeight: 700, color: '#ff9800', mb: 1 }}>
-                          {stats?.total_authentications || 0}
+                          {stats?.system_stats?.total_authentications || 0}
                         </Typography>
                         <Typography variant="body1" sx={{ color: '#fff' }}>
                           Total Authentication Attempts
@@ -924,7 +924,7 @@ function Analytics() {
                     <Card sx={{ bgcolor: '#0a0a0a', border: '2px solid #2196f3' }}>
                       <CardContent>
                         <Typography variant="h3" sx={{ fontWeight: 700, color: '#2196f3', mb: 1 }}>
-                          {stats?.successful_authentications || 0}
+                          {stats?.system_stats?.successful_authentications || 0}
                         </Typography>
                         <Typography variant="body1" sx={{ color: '#fff' }}>
                           Successful Authentications
@@ -951,3 +951,4 @@ function Analytics() {
 }
 
 export default Analytics;
+
