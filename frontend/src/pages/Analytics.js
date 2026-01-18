@@ -98,12 +98,26 @@ function Analytics() {
   const calculateMetrics = () => {
     if (!stats?.system_stats) return { far: 0, frr: 0, eer: 0, accuracy: 0 };
     
-    const total = stats.system_stats.total_authentications || 1;
+    const total = stats.system_stats.total_authentications || 0;
     const successful = stats.system_stats.successful_authentications || 0;
-    const failed = total - successful;
     
-    const accuracy = ((successful / total) * 100).toFixed(2);
-    const errorRate = ((failed / total) * 100).toFixed(2);
+    // If no data yet, return placeholder values
+    if (total === 0) {
+      return {
+        accuracy: 0,
+        errorRate: 0,
+        far: 0,
+        frr: 0,
+        eer: 0
+      };
+    }
+    
+    // Use the success_rate from backend if available, otherwise calculate
+    const accuracy = stats.system_stats.success_rate 
+      ? stats.system_stats.success_rate.toFixed(2)
+      : ((successful / total) * 100).toFixed(2);
+    
+    const errorRate = (100 - parseFloat(accuracy)).toFixed(2);
     
     return {
       accuracy,
@@ -294,33 +308,50 @@ function Analytics() {
               </Slide>
             )}
 
+            {/* Data Status Indicator */}
+            {stats?.system_stats?.total_authentications === 0 && (
+              <Slide direction="down" in>
+                <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
+                  No authentication data available yet. Metrics will update once users begin authentication attempts.
+                </Alert>
+              </Slide>
+            )}
+
             {/* Performance Metrics Cards */}
             <Grid container spacing={3} sx={{ mb: 3 }}>
               {[
                 { 
                   label: 'Accuracy', 
-                  value: `${metrics.accuracy}%`, 
+                  value: stats?.system_stats?.total_authentications > 0 
+                    ? `${metrics.accuracy}%` 
+                    : 'No Data',
                   icon: <CheckCircle />, 
                   color: '#4caf50',
                   desc: 'Overall system accuracy'
                 },
                 { 
                   label: 'FAR', 
-                  value: `${metrics.far}%`, 
+                  value: stats?.system_stats?.total_authentications > 0 
+                    ? `${metrics.far}%` 
+                    : 'No Data',
                   icon: <TrendingDown />, 
                   color: '#ff9800',
                   desc: 'False Acceptance Rate'
                 },
                 { 
                   label: 'FRR', 
-                  value: `${metrics.frr}%`, 
+                  value: stats?.system_stats?.total_authentications > 0 
+                    ? `${metrics.frr}%` 
+                    : 'No Data',
                   icon: <TrendingUp />, 
                   color: '#2196f3',
                   desc: 'False Rejection Rate'
                 },
                 { 
                   label: 'EER', 
-                  value: `${metrics.eer}%`, 
+                  value: stats?.system_stats?.total_authentications > 0 
+                    ? `${metrics.eer}%` 
+                    : 'No Data',
                   icon: <Speed />, 
                   color: '#9c27b0',
                   desc: 'Equal Error Rate'
@@ -392,7 +423,7 @@ function Analytics() {
                 </Box>
 
                 <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6} md={3}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <Card sx={{ 
                       bgcolor: '#0a0a0a', 
                       border: '2px solid #00ff88',
@@ -415,7 +446,7 @@ function Analytics() {
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <Card sx={{ 
                       bgcolor: '#0a0a0a', 
                       border: '2px solid #4caf50',
@@ -438,7 +469,32 @@ function Analytics() {
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Card sx={{ 
+                      bgcolor: '#0a0a0a', 
+                      border: '2px solid #9c27b0',
+                      transition: 'all 0.3s ease',
+                      '&:hover': { 
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 24px rgba(156,39,176,0.4)'
+                      }
+                    }}>
+                      <CardContent>
+                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#9c27b0', mb: 1 }}>
+                          {stats?.system_stats?.success_rate 
+                            ? `${stats.system_stats.success_rate.toFixed(2)}%`
+                            : '0.00%'}
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500 }}>
+                          Success Rate
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#aaa' }}>
+                          Authentication accuracy
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
                     <Card sx={{ 
                       bgcolor: '#0a0a0a', 
                       border: '2px solid #ff9800',
@@ -461,7 +517,7 @@ function Analytics() {
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <Card sx={{ 
                       bgcolor: '#0a0a0a', 
                       border: '2px solid #2196f3',
@@ -480,6 +536,29 @@ function Analytics() {
                         </Typography>
                         <Typography variant="caption" sx={{ color: '#aaa' }}>
                           Verified attempts
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Card sx={{ 
+                      bgcolor: '#0a0a0a', 
+                      border: '2px solid #f44336',
+                      transition: 'all 0.3s ease',
+                      '&:hover': { 
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 24px rgba(244,67,54,0.4)'
+                      }
+                    }}>
+                      <CardContent>
+                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#f44336', mb: 1 }}>
+                          {(stats?.system_stats?.total_authentications || 0) - (stats?.system_stats?.successful_authentications || 0)}
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500 }}>
+                          Failed
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#aaa' }}>
+                          Rejected attempts
                         </Typography>
                       </CardContent>
                     </Card>
