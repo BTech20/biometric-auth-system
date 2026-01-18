@@ -235,6 +235,12 @@ function Analytics() {
   const detData = generateDETData();
   const comparativeData = generateComparativeData();
 
+  // Debug logging
+  console.log('Stats:', stats);
+  console.log('System Stats:', stats?.system_stats);
+  console.log('Total Authentications:', stats?.system_stats?.total_authentications);
+  console.log('Calculated Metrics:', metrics);
+
   if (loading) {
     return (
       <Box sx={{ 
