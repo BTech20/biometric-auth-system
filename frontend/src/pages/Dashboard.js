@@ -170,10 +170,10 @@ function Dashboard({ setIsAuthenticated }) {
                 <Box>
                   <Grid container spacing={3}>
                     {[
-                      { icon: <DashboardIcon sx={{ fontSize: 50 }} />, value: stats?.total_users || 0, label: 'Total Users', color: '#00ff88', bg: 'rgba(0,255,136,0.1)' },
-                      { icon: <Person sx={{ fontSize: 50 }} />, value: stats?.active_users || 0, label: 'Active Users', color: '#00ff88', bg: 'rgba(0,255,136,0.1)' },
-                      { icon: <Security sx={{ fontSize: 50 }} />, value: stats?.total_authentications || 0, label: 'Total Auth', color: '#ff9800', bg: 'rgba(255,152,0,0.1)' },
-                      { icon: <Assessment sx={{ fontSize: 50 }} />, value: `${stats?.success_rate?.toFixed(1) || 0}%`, label: 'Success Rate', color: '#2196f3', bg: 'rgba(33,150,243,0.1)' },
+                      { icon: <Security sx={{ fontSize: 50 }} />, value: stats?.user_stats?.total_attempts || 0, label: 'My Total Logins', color: '#00ff88', bg: 'rgba(0,255,136,0.1)' },
+                      { icon: <Assessment sx={{ fontSize: 50 }} />, value: `${stats?.user_stats?.success_rate?.toFixed(1) || 0}%`, label: 'My Success Rate', color: '#2196f3', bg: 'rgba(33,150,243,0.1)' },
+                      { icon: <CheckCircle sx={{ fontSize: 50 }} />, value: stats?.user_stats?.successful_attempts || 0, label: 'Successful Logins', color: '#4caf50', bg: 'rgba(76,175,80,0.1)' },
+                      { icon: <Fingerprint sx={{ fontSize: 50 }} />, value: stats?.user_stats?.avg_hamming_distance?.toFixed(1) || 'N/A', label: 'Avg Match Score', color: '#ff9800', bg: 'rgba(255,152,0,0.1)' },
                     ].map((stat, index) => (
                       <Grid item xs={12} sm={6} key={index}>
                         <Slide direction="up" in timeout={600 + index * 100}>

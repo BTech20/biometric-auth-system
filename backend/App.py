@@ -306,21 +306,39 @@ def get_profile():
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
     try:
-        total_users = User.query.count()
-        active_users = User.query.filter_by(is_active=True).count()
-        total_auth_attempts = AuthenticationLog.query.count()
-        successful_auth = AuthenticationLog.query.filter_by(success=True).count()
+        token = request.headers.get('Authorization', '').replace('Bearer ', '')
+        user_id = verify_token(token)
+        if not user_id:
+            return jsonify({'error': 'Invalid token'}), 401
+        
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # User-specific stats
+        user_logs = AuthenticationLog.query.filter_by(user_id=user.id).all()
+        total_attempts = len(user_logs)
+        successful_attempts = sum(1 for log in user_logs if log.success)
+        
+        # Calculate average Hamming distance
+        hamming_distances = [log.hamming_distance for log in user_logs if log.hamming_distance is not None]
+        avg_hamming = sum(hamming_distances) / len(hamming_distances) if hamming_distances else 0
+        
         return jsonify({
-            'total_users': total_users,
-            'active_users': active_users,
-            'total_authentications': total_auth_attempts,
-            'successful_authentications': successful_auth,
-            'success_rate': (successful_auth / total_auth_attempts * 100) if total_auth_attempts > 0 else 0
+            'user_stats': {
+                'total_attempts': total_attempts,
+                'successful_attempts': successful_attempts,
+                'success_rate': (successful_attempts / total_attempts * 100) if total_attempts > 0 else 0,
+                'avg_hamming_distance': avg_hamming,
+                'best_match': min(hamming_distances) if hamming_distances else None,
+                'worst_match': max(hamming_distances) if hamming_distances else None
+            }
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+
 
 
