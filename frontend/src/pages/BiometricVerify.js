@@ -404,7 +404,7 @@ function BiometricVerify() {
               
               {!useHardwareScanner && !showFpWebcam && !fingerprintImage && (
                 <>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1, textAlign: 'center' }}>
+                  <Typography variant="body2" sx={{ mb: 1, textAlign: 'center', color: '#fff', fontWeight: 600 }}>
                     Choose how to capture your thumbprint:
                   </Typography>
                   <ButtonGroup fullWidth variant="outlined" sx={{ mb: 2 }}>
@@ -540,7 +540,7 @@ function BiometricVerify() {
                   }
                 }}
               >
-                {useHardwareScanner ? '← Back to Camera/Upload' : '🔐 Use Dell Fingerprint Scanner (Windows Hello)'}
+                {useHardwareScanner ? '← Back to Camera/Upload' : '🔐 Use Fingerprint Scanner (Windows Hello)'}
               </Button>
               
               {faceImage && fingerprintImage && (

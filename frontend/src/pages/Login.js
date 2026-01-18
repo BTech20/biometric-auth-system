@@ -327,7 +327,7 @@ function Login({ setIsAuthenticated }) {
             
             {!useHardwareScanner && !showFpWebcam && !fingerprintImage && (
               <>
-                <Typography variant="body2" sx={{ mb: 1, textAlign: 'center', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ mb: 1, textAlign: 'center', color: '#fff', fontWeight: 600 }}>
                   Choose how to capture your thumbprint:
                 </Typography>
                 <ButtonGroup fullWidth variant="outlined" sx={{ 
@@ -470,7 +470,7 @@ function Login({ setIsAuthenticated }) {
               onClick={() => setUseHardwareScanner(!useHardwareScanner)}
               sx={{ mb: 2, color: '#00ff88', fontWeight: 600 }}
             >
-              {useHardwareScanner ? '← Back to Camera/Upload' : '🔐 Use Dell Fingerprint Scanner (Requires Windows Hello)'}
+              {useHardwareScanner ? '← Back to Camera/Upload' : '🔐 Use Fingerprint Scanner (Requires Windows Hello)'}
             </Button>
             <Button 
               fullWidth 

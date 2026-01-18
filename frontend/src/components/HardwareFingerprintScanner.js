@@ -121,7 +121,7 @@ function HardwareFingerprintScanner({ onCapture, username = 'user', mode = 'regi
           Click button below → Windows will prompt for your fingerprint
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-          Make sure your Dell fingerprint sensor is clean and dry
+          Make sure your fingerprint sensor is clean and dry
         </Typography>
         
         <Button
