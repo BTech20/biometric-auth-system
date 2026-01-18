@@ -96,10 +96,10 @@ function Analytics() {
 
   // Calculate metrics
   const calculateMetrics = () => {
-    if (!stats) return { far: 0, frr: 0, eer: 0, accuracy: 0 };
+    if (!stats?.system_stats) return { far: 0, frr: 0, eer: 0, accuracy: 0 };
     
-    const total = stats.total_authentications || 1;
-    const successful = stats.successful_authentications || 0;
+    const total = stats.system_stats.total_authentications || 1;
+    const successful = stats.system_stats.successful_authentications || 0;
     const failed = total - successful;
     
     const accuracy = ((successful / total) * 100).toFixed(2);
