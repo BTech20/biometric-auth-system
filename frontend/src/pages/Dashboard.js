@@ -67,9 +67,20 @@ function Dashboard({ setIsAuthenticated }) {
         </Toolbar>
       </AppBar>
       
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Fade in timeout={800}>
-          <Grid container spacing={3}>
+          <Box>
+            {/* Welcome Section */}
+            <Box sx={{ mb: 4, textAlign: 'center' }}>
+              <Typography variant="h3" sx={{ fontWeight: 800, color: '#00ff88', mb: 1 }}>
+                Welcome, {profile?.username}! 👋
+              </Typography>
+              <Typography variant="body1" sx={{ color: '#999', fontSize: '1.1rem' }}>
+                Your secure biometric dashboard
+              </Typography>
+            </Box>
+
+            <Grid container spacing={3}>
             <Grid item xs={12} md={4}>
               <Slide direction="right" in timeout={600}>
                 <Card sx={{ 
@@ -358,7 +369,7 @@ function Dashboard({ setIsAuthenticated }) {
                 </Box>
               </Fade>
             </Grid>
-          </Grid>
+          </Box>
         </Fade>
       </Container>
     </Box>

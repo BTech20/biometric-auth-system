@@ -369,6 +369,125 @@ function Analytics() {
               ))}
             </Grid>
 
+            {/* System Statistics */}
+            <Slide direction="up" in timeout={800}>
+              <Paper sx={{ 
+                p: 4,
+                mb: 3,
+                borderRadius: 4,
+                bgcolor: '#1a1a1a',
+                border: '2px solid #00ff88',
+                boxShadow: '0 8px 32px rgba(0,255,136,0.3)'
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Security sx={{ mr: 2, color: '#00ff88', fontSize: 32 }} />
+                  <Box>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: '#00ff88' }}>
+                      System Statistics
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#fff', opacity: 0.8 }}>
+                      Overall system performance and usage metrics
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ 
+                      bgcolor: '#0a0a0a', 
+                      border: '2px solid #00ff88',
+                      transition: 'all 0.3s ease',
+                      '&:hover': { 
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 24px rgba(0,255,136,0.4)'
+                      }
+                    }}>
+                      <CardContent>
+                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#00ff88', mb: 1 }}>
+                          {stats?.system_stats?.total_users || 0}
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500 }}>
+                          Total Users
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#aaa' }}>
+                          Registered in system
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ 
+                      bgcolor: '#0a0a0a', 
+                      border: '2px solid #4caf50',
+                      transition: 'all 0.3s ease',
+                      '&:hover': { 
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 24px rgba(76,175,80,0.4)'
+                      }
+                    }}>
+                      <CardContent>
+                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#4caf50', mb: 1 }}>
+                          {stats?.system_stats?.active_users || 0}
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500 }}>
+                          Active Users
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#aaa' }}>
+                          Currently active
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ 
+                      bgcolor: '#0a0a0a', 
+                      border: '2px solid #ff9800',
+                      transition: 'all 0.3s ease',
+                      '&:hover': { 
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 24px rgba(255,152,0,0.4)'
+                      }
+                    }}>
+                      <CardContent>
+                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#ff9800', mb: 1 }}>
+                          {stats?.system_stats?.total_authentications || 0}
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500 }}>
+                          Total Attempts
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#aaa' }}>
+                          Authentication tries
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ 
+                      bgcolor: '#0a0a0a', 
+                      border: '2px solid #2196f3',
+                      transition: 'all 0.3s ease',
+                      '&:hover': { 
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 24px rgba(33,150,243,0.4)'
+                      }
+                    }}>
+                      <CardContent>
+                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#2196f3', mb: 1 }}>
+                          {stats?.system_stats?.successful_authentications || 0}
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500 }}>
+                          Successful
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#aaa' }}>
+                          Verified attempts
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Slide>
+
             {/* Advanced Analytics Visualizations */}
             <Slide direction="up" in timeout={900}>
               <Paper sx={{ 
@@ -855,90 +974,6 @@ function Analytics() {
                   <Typography variant="body2">
                     <strong>Recommendation:</strong> For identity card applications with high security requirements, 
                     maintain threshold between 10-20. Lower values increase security but may cause legitimate user rejections.
-                  </Typography>
-                </Alert>
-              </Paper>
-            </Slide>
-
-            {/* System Statistics */}
-            <Slide direction="up" in timeout={1000}>
-              <Paper sx={{ 
-                p: 4,
-                borderRadius: 4,
-                bgcolor: '#1a1a1a',
-                border: '2px solid #00ff88',
-                boxShadow: '0 8px 32px rgba(0,255,136,0.3)'
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Security sx={{ mr: 2, color: '#00ff88', fontSize: 32 }} />
-                  <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: '#00ff88' }}>
-                      System Statistics
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#fff', opacity: 0.8 }}>
-                      Overall system performance and usage metrics
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Divider sx={{ mb: 3 }} />
-
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={6}>
-                    <Card sx={{ bgcolor: '#0a0a0a', border: '2px solid #00ff88' }}>
-                      <CardContent>
-                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#00ff88', mb: 1 }}>
-                          {stats?.system_stats?.total_users || 0}
-                        </Typography>
-                        <Typography variant="body1" sx={{ color: '#fff' }}>
-                          Total Enrolled Users
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Card sx={{ bgcolor: '#0a0a0a', border: '2px solid #4caf50' }}>
-                      <CardContent>
-                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#4caf50', mb: 1 }}>
-                          {stats?.system_stats?.active_users || 0}
-                        </Typography>
-                        <Typography variant="body1" sx={{ color: '#fff' }}>
-                          Active Users
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Card sx={{ bgcolor: '#0a0a0a', border: '2px solid #ff9800' }}>
-                      <CardContent>
-                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#ff9800', mb: 1 }}>
-                          {stats?.system_stats?.total_authentications || 0}
-                        </Typography>
-                        <Typography variant="body1" sx={{ color: '#fff' }}>
-                          Total Authentication Attempts
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Card sx={{ bgcolor: '#0a0a0a', border: '2px solid #2196f3' }}>
-                      <CardContent>
-                        <Typography variant="h3" sx={{ fontWeight: 700, color: '#2196f3', mb: 1 }}>
-                          {stats?.system_stats?.successful_authentications || 0}
-                        </Typography>
-                        <Typography variant="body1" sx={{ color: '#fff' }}>
-                          Successful Authentications
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                </Grid>
-
-                <Alert severity="warning" sx={{ mt: 3, borderRadius: 2 }}>
-                  <Typography variant="body2">
-                    <strong>Research Note:</strong> For accurate FAR/FRR/EER calculations, you need to run 
-                    controlled experiments with genuine users and impostors. These metrics are currently estimated 
-                    based on overall authentication success rates.
                   </Typography>
                 </Alert>
               </Paper>
