@@ -286,6 +286,7 @@ function Dashboard({ setIsAuthenticated }) {
                       </Box>
                     </Slide>
                   )}
+                  </Grid>
                   
                   <Slide direction="up" in timeout={1200}>
                     <Card sx={{ 
