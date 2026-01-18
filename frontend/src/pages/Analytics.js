@@ -309,7 +309,7 @@ function Analytics() {
             )}
 
             {/* Data Status Indicator */}
-            {stats?.system_stats?.total_authentications === 0 && (
+            {(!stats?.system_stats?.total_authentications || stats?.system_stats?.total_authentications === 0) && (
               <Slide direction="down" in>
                 <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
                   No authentication data available yet. Metrics will update once users begin authentication attempts.
@@ -322,7 +322,7 @@ function Analytics() {
               {[
                 { 
                   label: 'Accuracy', 
-                  value: stats?.system_stats?.total_authentications > 0 
+                  value: (stats?.system_stats?.total_authentications > 0) 
                     ? `${metrics.accuracy}%` 
                     : 'No Data',
                   icon: <CheckCircle />, 
@@ -331,7 +331,7 @@ function Analytics() {
                 },
                 { 
                   label: 'FAR', 
-                  value: stats?.system_stats?.total_authentications > 0 
+                  value: (stats?.system_stats?.total_authentications > 0)
                     ? `${metrics.far}%` 
                     : 'No Data',
                   icon: <TrendingDown />, 
@@ -340,7 +340,7 @@ function Analytics() {
                 },
                 { 
                   label: 'FRR', 
-                  value: stats?.system_stats?.total_authentications > 0 
+                  value: (stats?.system_stats?.total_authentications > 0)
                     ? `${metrics.frr}%` 
                     : 'No Data',
                   icon: <TrendingUp />, 
@@ -349,7 +349,7 @@ function Analytics() {
                 },
                 { 
                   label: 'EER', 
-                  value: stats?.system_stats?.total_authentications > 0 
+                  value: (stats?.system_stats?.total_authentications > 0)
                     ? `${metrics.eer}%` 
                     : 'No Data',
                   icon: <Speed />, 
