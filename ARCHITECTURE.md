@@ -44,59 +44,42 @@ The system processes biometric data through a seven-layer architecture, from cli
 
 ```mermaid
 graph TB
-    subgraph Client["🖥️ Client Layer"]
+    subgraph ClientLayer["Client Layer"]
         A[Web Browser] --> B[React Application]
         B --> C[Material-UI Components]
         B --> D[React Router]
         B --> E[Axios HTTP Client]
     end
     
-    subgraph Communication["📡 Communication Layer"]
-        F[REST API]
-        G[JWT Authentication]
+    subgraph CommLayer["Communication Layer"]
+        E --> F[REST API]
+        F --> G[JWT Authentication]
     end
     
-    subgraph Server["⚙️ Server Layer"]
-        H[Flask Application]
-        I[Route Handlers]
-        J[Business Logic]
+    subgraph ServerLayer["Server Layer"]
+        G --> H[Flask Application]
+        H --> I[Route Handlers]
+        I --> J[Business Logic]
     end
     
-    subgraph Processing["🧠 Data Processing Layer"]
-        K[Image Preprocessing]
-        L[Deep Learning Models]
-        M[ResNet50 Face]
-        N[ResNet18 Fingerprint]
-        O[Feature Extraction]
-        P[Deep Hashing]
-        Q[128-bit Binary Codes]
+    subgraph DataLayer["Data Processing Layer"]
+        J --> K[Image Preprocessing]
+        K --> L[Deep Learning Models]
+        L --> M[ResNet50 Face]
+        L --> N[ResNet18 Fingerprint]
+        M --> O[Feature Extraction]
+        N --> O
+        O --> P[Deep Hashing]
+        P --> Q[Binary Codes]
     end
     
-    subgraph Storage["💾 Persistence Layer"]
-        R[SQLAlchemy ORM]
-        S[SQLite Database]
-        T[File System]
-        U[Uploaded Images]
+    subgraph PersistLayer["Persistence Layer"]
+        J --> R[SQLAlchemy ORM]
+        R --> S[SQLite Database]
+        Q --> S
+        J --> T[File System]
+        T --> U[Uploaded Images]
     end
-    
-    E --> F
-    F --> G
-    G --> H
-    H --> I
-    I --> J
-    J --> K
-    K --> L
-    L --> M
-    L --> N
-    M --> O
-    N --> O
-    O --> P
-    P --> Q
-    J --> R
-    R --> S
-    Q --> S
-    J --> T
-    T --> U
 ```
 
 ## 🔄 Component Architecture
@@ -104,125 +87,108 @@ graph TB
 ### Frontend Architecture
 
 ```mermaid
-graph TD
-    A["App.js (Main)"] 
-    B["React Router"]
-    C["Login Page"]
-    D["Register Page"]
-    E["Dashboard Page"]
-    F["BiometricVerify Page"]
-    G["Analytics Page"]
-    H["Auth Service"]
-    I["API Client"]
-    J["Hardware Scanner"]
-    K["Image Quality Check"]
-    L["Threshold Config"]
+graph LR
+    A[App.js] --> B[Router]
+    B --> C[Login]
+    B --> D[Register]
+    B --> E[Dashboard]
+    B --> F[BiometricVerify]
+    B --> G[Analytics]
     
-    A --> B
-    B --> C
-    B --> D
-    B --> E
-    B --> F
-    B --> G
-    C --> H
+    C --> H[AuthService]
     D --> H
     E --> H
     F --> H
     G --> H
-    H --> I
-    D --> J
-    D --> K
-    D --> L
+    
+    H --> I[Axios API Client]
+    
+    D --> J[HardwareFingerprintScanner]
+    D --> K[ImageQualityCheck]
+    D --> L[ThresholdConfig]
+    
     F --> J
     F --> K
     F --> L
+    
+    J --> M[WebAuthn Utilities]
 ```
 
 ### Backend Architecture
 
 ```mermaid
-graph TD
-    A["Flask Application"]
-    B["API Routes"]
-    C["Register Endpoint"]
-    D["Login Endpoint"]
-    E["Verify Endpoint"]
-    F["Profile Endpoint"]
-    G["Stats Endpoint"]
-    H["Auth Controller"]
-    I["Verify Controller"]
-    J["Profile Controller"]
-    K["Analytics Controller"]
-    L["User Model"]
-    M["SQLAlchemy ORM"]
-    N["SQLite Database"]
-    O["Biometric Processor"]
-    P["ML Pipeline"]
+graph TB
+    A[Flask App] --> B[Blueprints Routes]
+    B --> C[POST api register]
+    B --> D[POST api login]
+    B --> E[POST api verify]
+    B --> F[GET api profile]
+    B --> G[GET api stats]
     
-    A --> B
-    B --> C
-    B --> D
-    B --> E
-    B --> F
-    B --> G
-    C --> H
+    C --> H[Auth Controller]
     D --> H
-    E --> I
-    F --> J
-    G --> K
-    H --> L
+    E --> I[Verify Controller]
+    F --> J[Profile Controller]
+    G --> K[Analytics Controller]
+    
+    H --> L[User Model]
     I --> L
     J --> L
     K --> L
-    L --> M
-    M --> N
-    I --> O
-    O --> P
+    
+    L --> M[SQLAlchemy]
+    M --> N[SQLite Database]
+    
+    I --> O[Biometric Processor]
+    O --> P[Image Preprocessing]
+    P --> Q[Model Inference]
+    Q --> R[Deep Hashing]
+    R --> S[Hamming Distance]
 ```
 
 ## 🗄️ Database Schema
 
 ```mermaid
-erDiagram
-    USERS {
-        int id PK
-        string username UK
-        string email UK
-        string password_hash
-        text multimodal_hash
-        boolean is_active
-        datetime created_at
-        datetime last_login
-    }
+graph TB
+    subgraph USERS["USERS Table"]
+        U1[id - Primary Key]
+        U2[username - Unique]
+        U3[email - Unique]
+        U4[password_hash]
+        U5[face_template]
+        U6[fingerprint_template]
+        U7[is_active]
+        U8[created_at]
+        U9[updated_at]
+    end
     
-    AUTHENTICATION_LOGS {
-        int id PK
-        int user_id FK
-        string authentication_method
-        boolean success
-        string ip_address
-        string user_agent
-        datetime timestamp
-    }
+    subgraph AUTH_LOGS["AUTHENTICATION_LOGS Table"]
+        A1[id - Primary Key]
+        A2[user_id - Foreign Key]
+        A3[auth_method]
+        A4[success]
+        A5[hamming_distance]
+        A6[threshold]
+        A7[timestamp]
+        A8[ip_address]
+    end
     
-    USERS ||--o{ AUTHENTICATION_LOGS : "has many"
+    USERS --> AUTH_LOGS
 ```
 
 ## 🧠 Deep Learning Pipeline
 
 ```mermaid
-flowchart LR
-    A["Input Image"] --> B["Resize 224x224"]
-    B --> C["Normalize RGB"]
-    C --> D["Tensor Conversion"]
-    D --> E["ResNet Backbone"]
-    E --> F["512D Feature Vector"]
-    F --> G["Hash Layer"]
-    G --> H["Sigmoid Activation"]
-    H --> I["Binary Quantization"]
-    I --> J["128-bit Hash Code"]
-    
-    style J fill:#90EE90
+graph LR
+    A[Input Image] --> B[Resize 224x224]
+    B --> C[Normalize RGB]
+    C --> D[Tensor Conversion]
+    D --> E[ResNet Backbone]
+    E --> F[Feature Vector 512D]
+    F --> G[Hash Layer]
+    G --> H[Sigmoid Activation]
+    H --> I[Binary Quantization]
+    I --> J[Binary Hash Code]
 ```
 
 ### Model Specifications
@@ -244,22 +210,20 @@ flowchart LR
 ## 🔐 Security Architecture
 
 ```mermaid
-flowchart TD
-    A["Client Request"] --> B{"HTTPS?"}
-    B -->|"No"| C["Reject"]
-    B -->|"Yes"| D["CORS Check"]
-    D --> E{"Valid Origin?"}
-    E -->|"No"| C
-    E -->|"Yes"| F["JWT Validation"]
-    F --> G{"Valid Token?"}
-    G -->|"No"| H["401 Unauthorized"]
-    G -->|"Yes"| I["Input Validation"]
-    I --> J{"Valid Input?"}
-    J -->|"No"| K["400 Bad Request"]
-    J -->|"Yes"| L["Process Request"]
-    L --> M["Success Response"]
-    
-    style M fill:#90EE90
+graph TB
+    A[Client Request] --> B{HTTPS Check}
+    B --> C[Reject Request]
+    B --> D[CORS Check]
+    D --> E{Valid Origin Check}
+    E --> C
+    E --> F[JWT Validation]
+    F --> G{Valid Token Check}
+    G --> H[401 Unauthorized]
+    G --> I[Input Validation]
+    I --> J{Valid Input Check}
+    J --> K[400 Bad Request]
+    J --> L[Process Request]
+    L --> M[Response]
 ```
 
 ### Security Layers
@@ -288,18 +252,24 @@ flowchart TD
 ### RESTful Endpoints
 
 ```mermaid
-flowchart LR
-    A["Client"] --> B["Register API"]
-    A --> C["Login API"]
-    A --> D["Profile API"]
-    A --> E["Verify API"]
-    A --> F["Stats API"]
+graph LR
+    A[Client] --> B[Registration]
+    A --> C[Authentication]
+    A --> D[Profile Retrieval]
+    A --> E[Biometric Verification]
+    A --> F[Analytics]
     
-    B --> G["201 Created"]
-    C --> H["200 OK + Token"]
-    D --> I["200 User Data"]
-    E --> J["200 Verification"]
-    F --> K["200 Analytics"]
+    B --> G[201 Created]
+    C --> H[200 OK Token]
+    D --> I[200 OK Data]
+    E --> J[200 OK Result]
+    F --> K[200 OK Stats]
+    
+    A -.->|POST register| B
+    A -.->|POST login| C
+    A -.->|GET profile| D
+    A -.->|POST verify| E
+    A -.->|GET stats| F
 ```
 
 ### Request/Response Flow
@@ -310,100 +280,96 @@ sequenceDiagram
     participant F as Frontend
     participant A as API
     participant B as Backend
-    participant M as ML_Model
+    participant M as ML Model
     participant D as Database
     
-    C->>F: User_Action
-    F->>A: HTTP_Request_JWT
-    A->>B: Validate_Token
-    B->>B: Authorize_User
-    B->>M: Process_Biometrics
-    M->>M: Extract_Features
-    M->>M: Generate_Hash
-    B->>D: Query_Update
-    D->>B: Return_Result
-    B->>A: Send_Response
-    A->>F: JSON_Data
-    F->>C: Update_UI
+    C->>F: User Action
+    F->>A: HTTP Request + JWT
+    A->>B: Validate Token
+    B->>B: Authorize
+    B->>M: Process Biometrics
+    M->>M: Extract Features
+    M->>M: Generate Hash
+    B->>D: Query/Update
+    D->>B: Result
+    B->>A: Response
+    A->>F: JSON Data
+    F->>C: Update UI
 ```
 
 ## 💾 Data Flow
 
 ```mermaid
-flowchart TD
-    A["User Captures Image"] --> B["Base64 Encoding"]
-    B --> C["HTTP POST to Backend"]
-    C --> D["Decode Base64"]
-    D --> E["Save to Uploads"]
-    E --> F["Load Image"]
-    F --> G["Preprocess"]
-    G --> H["Model Inference"]
-    H --> I["Extract Features"]
-    I --> J["Hash Generation"]
-    J --> K["Store in Database"]
+graph TB
+    A[User Captures Image] --> B[Base64 Encoding]
+    B --> C[HTTP POST Backend]
+    C --> D[Decode Base64]
+    D --> E[Save to Uploads]
+    E --> F[Load Image]
+    F --> G[Preprocess]
+    G --> H[Model Inference]
+    H --> I[Extract Features]
+    I --> J[Hash Generation]
+    J --> K[Store in Database]
     
-    L["Verification Request"] --> M["Load Stored Hash"]
-    M --> N["New Image Capture"]
-    N --> O["Generate New Hash"]
-    O --> P["Hamming Distance"]
-    P --> Q{"Distance < Threshold?"}
-    Q -->|"Yes"| R["Verified ✓"]
-    Q -->|"No"| S["Failed ✗"]
-    
-    K --> L
-    
-    style R fill:#90EE90
-    style S fill:#FFB6C1
+    K --> L[Verification Request]
+    L --> M[Load Stored Hash]
+    M --> N[New Image Capture]
+    N --> O[Generate New Hash]
+    O --> P[Hamming Distance]
+    P --> Q{Distance Less Than Threshold}
+    Q --> R[Verified]
+    Q --> S[Failed]
 ```
 
 ## 🔄 Verification Process
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Idle
-    Idle --> CaptureImages : User_Initiates
-    CaptureImages --> QualityCheck : Images_Captured
-    QualityCheck --> Preprocessing : Quality_OK
-    QualityCheck --> CaptureImages : Quality_Poor
-    Preprocessing --> FeatureExtraction : Images_Processed
-    FeatureExtraction --> HashGeneration : Features_Extracted
-    HashGeneration --> DatabaseQuery : Hashes_Generated
-    DatabaseQuery --> DistanceCalculation : Templates_Retrieved
-    DistanceCalculation --> ThresholdComparison : Distance_Computed
-    ThresholdComparison --> Verified : Distance_Below_Threshold
-    ThresholdComparison --> Failed : Distance_Above_Threshold
-    Verified --> [*]
-    Failed --> [*]
+graph TB
+    A[Start] --> B[Capture Images]
+    B --> C{Quality Check}
+    C -->|Poor Quality| B
+    C -->|Quality OK| D[Preprocessing]
+    D --> E[Feature Extraction]
+    E --> F[Hash Generation]
+    F --> G[Database Query]
+    G --> H[Distance Calculation]
+    H --> I{Threshold Comparison}
+    I -->|Distance Low| J[Verified]
+    I -->|Distance High| K[Failed]
+    J --> L[End]
+    K --> L[End]
 ```
 
 ## 🌐 Deployment Architecture
 
 ```mermaid
-flowchart TD
-    subgraph Clients["Client Devices"]
-        A["Desktop Browser"]
-        B["Mobile Browser"]
-        C["Tablet Browser"]
+graph TB
+    subgraph ClientDevices["Client Devices"]
+        A[Desktop Browser]
+        B[Mobile Browser]
+        C[Tablet Browser]
     end
     
-    subgraph Hosting["CDN/Hosting"]
-        D["Static Assets"]
-        E["React Build"]
+    subgraph CDNHosting["CDN Hosting"]
+        D[Static Assets]
+        E[React Build]
     end
     
     subgraph AppServer["Application Server"]
-        F["Flask API"]
-        G["Gunicorn WSGI"]
+        F[Flask API]
+        G[Gunicorn]
+        H[WSGI]
     end
     
-    subgraph ML["ML Infrastructure"]
-        H["PyTorch Models"]
-        I["CPU/GPU Compute"]
+    subgraph MLInfra["ML Infrastructure"]
+        I[PyTorch Models]
+        J[GPU CPU Compute]
     end
     
-    subgraph Storage["Data Storage"]
-        J["Database"]
-        K["File Storage"]
+    subgraph DataStorage["Data Storage"]
+        K[Database Server]
+        L[File Storage]
     end
     
     A --> D
@@ -414,27 +380,28 @@ flowchart TD
     F --> G
     G --> H
     H --> I
-    F --> J
+    I --> J
     F --> K
+    F --> L
 ```
 
 ## 📱 Mobile Architecture
 
 ```mermaid
-flowchart TD
-    A["Mobile Browser"] --> B["Camera API"]
-    B --> C{"Permission Granted?"}
-    C -->|"Yes"| D["Access Camera"]
-    C -->|"No"| E["Show Error"]
-    D --> F["Face Camera"]
-    D --> G["Fingerprint Scanner"]
-    F --> H["Base64 Image"]
+graph TB
+    A[Mobile Browser] --> B[Camera API]
+    B --> C{Permission Check}
+    C --> D[Access Camera]
+    C --> E[Show Error]
+    D --> F[Front Camera Face]
+    D --> G[Rear Camera Finger]
+    F --> H[Base64 Image]
     G --> H
-    H --> I["Upload to Server"]
-    I --> J["Process & Verify"]
+    H --> I[Upload to Server]
+    I --> J[Process Verify]
     
-    K["PWA Manifest"] --> L["Install Prompt"]
-    L --> M["Standalone Mode"]
+    K[PWA Manifest] --> L[Install Prompt]
+    L --> M[Standalone Mode]
 ```
 
 ## 🔧 Technology Stack Details
@@ -489,20 +456,20 @@ Utilities:
 ## 🚀 Performance Considerations
 
 ```mermaid
-flowchart TD
-    A["Optimization Strategies"]
-    A --> B["Frontend"]
-    A --> C["Backend"]
+graph LR
+    A[Optimization Strategies]
+    A --> B[Frontend]
+    A --> C[Backend]
     
-    B --> D["Code Splitting"]
-    B --> E["Lazy Loading"]
-    B --> F["Image Compression"]
-    B --> G["Caching"]
+    B --> D[Code Splitting]
+    B --> E[Lazy Loading]
+    B --> F[Image Compression]
+    B --> G[Caching]
     
-    C --> H["Model Caching"]
-    C --> I["Connection Pooling"]
-    C --> J["Async Processing"]
-    C --> K["GPU Acceleration"]
+    C --> H[Model Caching]
+    C --> I[Connection Pooling]
+    C --> J[Async Processing]
+    C --> K[GPU Acceleration]
 ```
 
 ### Performance Metrics
@@ -515,21 +482,21 @@ flowchart TD
 ## 📊 Scalability
 
 ```mermaid
-flowchart TD
-    A["Load Balancer"] --> B["Frontend Server 1"]
-    A --> C["Frontend Server 2"]
-    A --> D["Frontend Server N"]
+graph TB
+    A[Load Balancer] --> B[Frontend Server 1]
+    A --> C[Frontend Server 2]
+    A --> D[Frontend Server N]
     
-    E["API Gateway"] --> F["Backend Server 1"]
-    E --> G["Backend Server 2"]
-    E --> H["Backend Server N"]
+    E[API Gateway] --> F[Backend Server 1]
+    E --> G[Backend Server 2]
+    E --> H[Backend Server N]
     
-    F --> I["Model Serving"]
+    F --> I[Model Serving]
     G --> I
     H --> I
     
-    I --> J["Shared Database"]
-    I --> K["Object Storage"]
+    I --> J[Shared Database]
+    I --> K[Object Storage]
 ```
 
 ### Scaling Strategies
