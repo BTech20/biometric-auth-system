@@ -412,6 +412,16 @@ graph TB
     K[PWA Manifest] --> L[Install Prompt]
     L --> M[Standalone Mode]
 ```
+```mermaid
+graph TB
+  subgraph "Client Layer"
+    A[Web Browser] --> B[React Application]
+    B --> C[Material-UI Components]
+    B --> D[React Router]
+    B --> E[Axios HTTP Client]
+  end
+```
+
 
 ## 🔧 Technology Stack Details
 
