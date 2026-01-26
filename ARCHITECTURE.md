@@ -42,53 +42,91 @@ The system processes biometric data through a seven-layer architecture, from cli
 
 ## 📊 High-Level Architecture
 
-```mermaid
-graph TD
-    A[Web Browser] --> B[React App]
-    B --> C[Flask API]
-    C --> D[ML Models]
-    D --> E[Database]
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ Web Browser │───▶│ React App   │───▶│ Flask API   │───▶│ ML Models   │───▶│ Database    │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
 ## 🔄 Component Architecture
 
 ### Frontend Architecture
 
-```mermaid
-graph LR
-    A[App] --> B[Router]
-    B --> C[Login]
-    B --> D[Register] 
-    B --> E[Dashboard]
+```
+┌─────────┐
+│   App   │
+└────┬────┘
+     │
+┌────▼────┐
+│ Router  │
+└────┬────┘
+     │
+├────┼────┼────┐
+▼    ▼    ▼    ▼
+Login Register Dashboard Analytics
 ```
 
 ### Backend Architecture
 
-```mermaid
-graph TD
-    A[Flask App] --> B[Routes]
-    B --> C[Controllers]
-    C --> D[Models]
-    D --> E[Database]
+```
+┌─────────────┐
+│ Flask App   │
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│   Routes    │
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│ Controllers │
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│   Models    │
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│  Database   │
+└─────────────┘
 ```
 
 ## 🗄️ Database Schema
 
-```mermaid
-graph TD
-    A[Users] --> B[Auth Logs]
-    A --> C[Biometric Data]
-    B --> D[Login History]
+```
+┌─────────────────────────────────────┐
+│             USERS TABLE             │
+├─────────────────────────────────────┤
+│ id (Primary Key)                    │
+│ username (Unique)                   │
+│ email (Unique)                      │
+│ password_hash                       │
+│ face_template                       │
+│ fingerprint_template                │
+│ is_active                           │
+│ created_at                          │
+└─────────────────┬───────────────────┘
+                  │ (One-to-Many)
+┌─────────────────▼───────────────────┐
+│       AUTHENTICATION_LOGS TABLE     │
+├─────────────────────────────────────┤
+│ id (Primary Key)                    │
+│ user_id (Foreign Key)               │
+│ auth_method                         │
+│ success                             │
+│ hamming_distance                    │
+│ threshold                           │
+│ timestamp                           │
+│ ip_address                          │
+└─────────────────────────────────────┘
 ```
 
 ## 🧠 Deep Learning Pipeline
 
-```mermaid
-graph LR
-    A[Image] --> B[Preprocess]
-    B --> C[ResNet]
-    C --> D[Features]
-    D --> E[Hash]
+```
+┌───────────┐   ┌─────────────┐   ┌────────┐   ┌──────────┐   ┌──────┐
+│   Image   │──▶│ Preprocess  │──▶│ ResNet │──▶│ Features │──▶│ Hash │
+│ (224x224) │   │ Normalize   │   │ Model  │   │ (512D)   │   │(128b)│
+└───────────┘   └─────────────┘   └────────┘   └──────────┘   └──────┘
 ```
 
 ### Model Specifications
@@ -109,12 +147,26 @@ graph LR
 
 ## 🔐 Security Architecture
 
-```mermaid
-graph TD
-    A[Request] --> B[HTTPS]
-    B --> C[CORS]
-    C --> D[JWT]
-    D --> E[Response]
+```
+┌─────────────────┐
+│ Client Request  │
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│  HTTPS Check   │
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│  CORS Check    │
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│ JWT Validation │
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│   Response     │
+└─────────────────┘
 ```
 
 ### Security Layers
@@ -142,24 +194,29 @@ graph TD
 
 ### RESTful Endpoints
 
-```mermaid
-graph LR
-    A[Client] --> B[API]
-    B --> C[Register]
-    B --> D[Login]
-    B --> E[Verify]
+```
+┌────────────────────────────────────┐
+│               CLIENT              │
+└──────────────────┬─────────────────┘
+                   │
+┌──────────────────▼──────────────────┐
+│               API                │
+└──────────────────┬──────────────────┘
+                   │
+    ├───────────────┼────────────────┐
+    ▼              ▼              ▼
+┌─────────┐ ┌─────────┐ ┌─────────┐
+│ Register │ │  Login   │ │ Verify  │
+└─────────┘ └─────────┘ └─────────┘
 ```
 
 ### Request/Response Flow
 
-```mermaid
-graph LR
-    A[User] --> B[Frontend]
-    B --> C[API]
-    C --> D[Database]
-    D --> C
-    C --> B
-    B --> A
+
+**Request/Response Flow:**
+```
+User ───▶ Frontend ───▶ API ───▶ Database
+     ◀───          ◀───     ◀───
 ```
 
 ### Request/Response Flow
@@ -189,12 +246,11 @@ sequenceDiagram
 
 ## 💾 Data Flow
 
-```mermaid
-graph TD
-    A[Capture] --> B[Upload]
-    B --> C[Process]
-    C --> D[Store]
-    D --> E[Verify]
+```
+┌───────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+│  Capture   │──▶│  Upload   │──▶│ Process  │──▶│  Store   │──▶│  Verify  │
+│   Image    │   │  Base64   │   │ Features │   │ Template │   │ Compare  │
+└───────────┘   └──────────┘   └──────────┘   └──────────┘   └──────────┘
 ```
 
 ## 🔄 Verification Process
@@ -209,21 +265,41 @@ graph TD
 
 ## 🌐 Deployment Architecture
 
-```mermaid
-graph TD
-    A[Browser] --> B[Frontend]
-    B --> C[Backend]
-    C --> D[Database]
+```
+┌────────────────────────────────────────────────────────────────┐
+│              CLIENT DEVICES (Browser, Mobile, Tablet)             │
+└───────────────────────────────┬───────────────────────────────┘
+                                │
+┌───────────────────────────────▼───────────────────────────────┐
+│                      FRONTEND (React App)                     │
+└───────────────────────────────┬───────────────────────────────┘
+                                │
+┌───────────────────────────────▼───────────────────────────────┐
+│                   BACKEND (Flask API + ML)                   │
+└───────────────────────────────┬───────────────────────────────┘
+                                │
+┌───────────────────────────────▼───────────────────────────────┐
+│                    DATABASE (SQLite)                        │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ## 📱 Mobile Architecture
 
-```mermaid
-graph TD
-    A[Mobile] --> B[Camera]
-    B --> C[Capture]
-    C --> D[Upload]
-    D --> E[Process]
+```
+┌───────────────────────────────────┐
+│          MOBILE BROWSER         │
+└─────────────────┬─────────────────┘
+                  │
+┌─────────────────▼─────────────────┐
+│           CAMERA API            │
+└─────────────────┬─────────────────┘
+                  │
+        ├─────────┼─────────┤
+        ▼         ▼         ▼
+┌─────────┐ ┌─────────┐ ┌─────────┐
+│  Front   │ │  Rear   │ │ Process │
+│ Camera  │ │ Camera  │ │ & Upload│
+└─────────┘ └─────────┘ └─────────┘
 ```
 
 ## 🔧 Technology Stack Details
@@ -277,12 +353,14 @@ Utilities:
 
 ## 🚀 Performance Considerations
 
-```mermaid
-graph LR
-    A[Performance] --> B[Frontend]
-    A --> C[Backend]
-    B --> D[Caching]
-    C --> E[Models]
+**Performance Optimization:**
+```
+FRONTEND                    BACKEND
+│                           │
+├─ Code Splitting             ├─ Model Caching
+├─ Lazy Loading              ├─ Connection Pooling
+├─ Image Compression         ├─ Async Processing
+└─ Component Caching         └─ GPU Acceleration
 ```
 
 ### Performance Metrics
@@ -294,11 +372,23 @@ graph LR
 
 ## 📊 Scalability
 
-```mermaid
-graph TD
-    A[Load Balancer] --> B[Frontend]
-    A --> C[Backend]
-    C --> D[Database]
+**System Scalability:**
+```
+┌───────────────────────────────────┐
+│          LOAD BALANCER           │
+└──────────────┬────────────────────┘
+               │
+      ├────────┼────────┤
+      ▼        ▼        ▼
+┌────────┐ ┌────────┐ ┌────────┐
+│Frontend1│ │Frontend2│ │Frontend3│
+└────┬───┘ └────┬───┘ └────┬───┘
+     │            │            │
+     └────────────┼────────────┘
+                    ▼
+┌───────────────────────────────────┐
+│      BACKEND CLUSTER + DB       │
+└───────────────────────────────────┘
 ```
 
 ### Scaling Strategies
