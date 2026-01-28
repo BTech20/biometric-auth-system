@@ -6,7 +6,7 @@ import { authService } from '../services/api';
 import HardwareFingerprintScanner from '../components/HardwareFingerprintScanner';
 import ThresholdConfig from '../components/ThresholdConfig';
 import ImageQualityCheck from '../components/ImageQualityCheck';
-import BiometricCaptureNew from '../components/BiometricCaptureNew';
+import WorkingBiometricCapture from '../components/WorkingBiometricCapture';
 
 function BiometricVerify() {
   const navigate = useNavigate();
@@ -300,7 +300,7 @@ function BiometricVerify() {
                 }
               }} />
               {showWebcam && (
-                <BiometricCaptureNew 
+                <WorkingBiometricCapture 
                   type="face"
                   onCapture={(imageData) => {
                     setFaceImage(imageData);
@@ -417,7 +417,7 @@ function BiometricVerify() {
                     }
                   }} />
                   {showFpWebcam && (
-                    <BiometricCaptureNew 
+                    <WorkingBiometricCapture 
                       type="thumb"
                       onCapture={(imageData) => {
                         setFingerprintImage(imageData);

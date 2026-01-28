@@ -5,7 +5,7 @@ import { CameraAlt, Upload, Person, Email, Lock, Visibility, VisibilityOff, HowT
 import { authService } from '../services/api';
 import HardwareFingerprintScanner from '../components/HardwareFingerprintScanner';
 import ImageQualityCheck from '../components/ImageQualityCheck';
-import BiometricSimple from '../components/BiometricSimple';
+import WorkingBiometricCapture from '../components/WorkingBiometricCapture';
 
 const steps = ['Account Details', 'Face Capture', 'Fingerprint Scan'];
 
@@ -238,21 +238,18 @@ function Register({ setIsAuthenticated }) {
                 }
               }} />
               {showWebcam && (
-                <>
-                  {console.log('🎬 Rendering BiometricSimple component')}
-                  <BiometricSimple 
-                    type="face"
-                    onCapture={(imageData) => {
-                      console.log('📸 onCapture called with:', imageData);
-                      setFaceImage(imageData);
-                      setShowWebcam(false);
-                    }}
-                    onCancel={() => {
-                      console.log('❌ onCancel called');
-                      setShowWebcam(false);
-                    }}
-                  />
-                </>
+                <WorkingBiometricCapture 
+                  type="face"
+                  onCapture={(imageData) => {
+                    console.log('📸 Face captured successfully');
+                    setFaceImage(imageData);
+                    setShowWebcam(false);
+                  }}
+                  onCancel={() => {
+                    console.log('❌ Face capture cancelled');
+                    setShowWebcam(false);
+                  }}
+                />
               )}
               {faceImage && !showWebcam && (
                 <Box sx={{ mb: 2 }}>
@@ -337,13 +334,17 @@ function Register({ setIsAuthenticated }) {
                     }
                   }} />
                   {showFpWebcam && (
-                    <BiometricTest 
+                    <WorkingBiometricCapture 
                       type="thumb"
                       onCapture={(imageData) => {
+                        console.log('📸 Thumb captured successfully');
                         setFingerprintImage(imageData);
                         setShowFpWebcam(false);
                       }}
-                      onCancel={() => setShowFpWebcam(false)}
+                      onCancel={() => {
+                        console.log('❌ Thumb capture cancelled');
+                        setShowFpWebcam(false);
+                      }}
                     />
                   )}
                 </>
