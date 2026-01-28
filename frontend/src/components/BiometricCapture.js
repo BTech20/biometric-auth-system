@@ -14,22 +14,30 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
 
   // Simple and reliable detection function
   const performDetection = useCallback(() => {
-    if (
-      webcamRef.current &&
-      webcamRef.current.video &&
-      webcamRef.current.video.readyState === 4
-    ) {
-      const video = webcamRef.current.video;
-      const canvas = canvasRef.current;
-      
-      if (!canvas) {
-        console.log('Canvas not available');
-        return;
-      }
-      
-      try {
+    try {
+      if (
+        webcamRef.current &&
+        webcamRef.current.video &&
+        webcamRef.current.video.readyState === 4 &&
+        webcamRef.current.video.videoWidth > 0 &&
+        webcamRef.current.video.videoHeight > 0
+      ) {
+        const video = webcamRef.current.video;
+        const canvas = canvasRef.current;
+        
+        if (!canvas) {
+          console.log('Canvas not available');
+          return;
+        }
+        
+        // Set canvas dimensions to match video
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
+        
+        if (canvas.width <= 0 || canvas.height <= 0) {
+          console.log('Invalid canvas dimensions:', canvas.width, 'x', canvas.height);
+          return;
+        }
         
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -43,17 +51,28 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
           detectThumbSimple(data, canvas.width, canvas.height);
         }
         
-      } catch (error) {
-        console.error('Detection error:', error);
-        setDebugInfo(`Error: ${error.message}`);
+      } else {
+        const readyState = webcamRef.current?.video?.readyState || 'no video';
+        const videoWidth = webcamRef.current?.video?.videoWidth || 0;
+        const videoHeight = webcamRef.current?.video?.videoHeight || 0;
+        console.log(`Video not ready - State: ${readyState}, Dimensions: ${videoWidth}x${videoHeight}`);
       }
-    } else {
-      console.log('Video not ready, readyState:', webcamRef.current?.video?.readyState);
+    } catch (error) {
+      console.error('Detection error:', error);
+      setDebugInfo(`Error: ${error.message}`);
     }
-  }, [type]);
+  }, [type, detectFaceSimple, detectThumbSimple]);
 
   // Simple face detection
   const detectFaceSimple = useCallback((data, width, height) => {
+    // Add safety check for dimensions
+    if (width <= 0 || height <= 0 || !data || data.length === 0) {
+      setIsDetected(false);
+      setDetectionScore(0);
+      setDebugInfo('Invalid video dimensions or data');
+      return;
+    }
+    
     const centerX = width / 2;
     const centerY = height / 2;
     const ovalRadiusX = width * 0.32;
@@ -65,35 +84,37 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
     let darkPixels = 0;
     let totalBrightness = 0;
     
-    // Sample pixels in the oval area
-    for (let y = Math.max(0, centerY - ovalRadiusY); y < Math.min(height, centerY + ovalRadiusY); y += 3) {
-      for (let x = Math.max(0, centerX - ovalRadiusX); x < Math.min(width, centerX + ovalRadiusX); x += 3) {
+    // Sample pixels in the oval area (skip pixels for performance)
+    for (let y = Math.max(0, Math.floor(centerY - ovalRadiusY)); y < Math.min(height, Math.ceil(centerY + ovalRadiusY)); y += 4) {
+      for (let x = Math.max(0, Math.floor(centerX - ovalRadiusX)); x < Math.min(width, Math.ceil(centerX + ovalRadiusX)); x += 4) {
         const normalizedX = (x - centerX) / ovalRadiusX;
         const normalizedY = (y - centerY) / ovalRadiusY;
         
         if (normalizedX * normalizedX + normalizedY * normalizedY <= 1) {
-          const i = (Math.floor(y) * width + Math.floor(x)) * 4;
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          
-          const brightness = (r + g + b) / 3;
-          totalBrightness += brightness;
-          totalPixels++;
-          
-          // Check for content (not too dark, not too bright)
-          if (brightness > 30 && brightness < 220) {
-            contentPixels++;
-          }
-          
-          // Simple skin detection
-          if (r > 60 && g > 40 && b > 20 && r > g && r > b * 1.2) {
-            skinPixels++;
-          }
-          
-          // Dark areas (hair, eyes, shadows)
-          if (brightness < 100) {
-            darkPixels++;
+          const i = (y * width + x) * 4;
+          if (i + 3 < data.length) {
+            const r = data[i] || 0;
+            const g = data[i + 1] || 0;
+            const b = data[i + 2] || 0;
+            
+            const brightness = (r + g + b) / 3;
+            totalBrightness += brightness;
+            totalPixels++;
+            
+            // Check for content (not too dark, not too bright)
+            if (brightness > 20 && brightness < 240) {
+              contentPixels++;
+            }
+            
+            // Relaxed skin detection
+            if (r > 50 && g > 30 && b > 15 && r >= g && r >= b) {
+              skinPixels++;
+            }
+            
+            // Dark areas (hair, eyes, shadows)
+            if (brightness < 120) {
+              darkPixels++;
+            }
           }
         }
       }
@@ -102,7 +123,7 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
     if (totalPixels === 0) {
       setIsDetected(false);
       setDetectionScore(0);
-      setDebugInfo('No pixels to analyze');
+      setDebugInfo('No pixels in detection area');
       return;
     }
     
@@ -111,46 +132,54 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
     const skinRatio = skinPixels / totalPixels;
     const darkRatio = darkPixels / totalPixels;
     
-    // Simplified scoring
+    // More lenient scoring
     let score = 0;
     
-    // Good lighting (40 points)
-    if (avgBrightness > 50 && avgBrightness < 180) {
-      score += 40;
-    } else if (avgBrightness > 30 && avgBrightness < 200) {
+    // Good lighting (35 points)
+    if (avgBrightness > 40 && avgBrightness < 190) {
+      score += 35;
+    } else if (avgBrightness > 20 && avgBrightness < 220) {
       score += 20;
     }
     
-    // Content presence (30 points)
-    if (contentRatio > 0.7) {
-      score += 30;
-    } else if (contentRatio > 0.5) {
-      score += 15;
+    // Content presence (35 points)
+    if (contentRatio > 0.6) {
+      score += 35;
+    } else if (contentRatio > 0.4) {
+      score += 20;
     }
     
     // Skin tone (20 points) 
-    if (skinRatio > 0.1) {
+    if (skinRatio > 0.05) {
       score += 20;
-    } else if (skinRatio > 0.05) {
+    } else if (skinRatio > 0.02) {
       score += 10;
     }
     
     // Contrast from dark areas (10 points)
-    if (darkRatio > 0.1 && darkRatio < 0.5) {
+    if (darkRatio > 0.05 && darkRatio < 0.6) {
       score += 10;
     }
     
-    const detected = score >= 60; // Lower threshold for easier detection
+    const detected = score >= 45; // Much lower threshold!
     setIsDetected(detected);
     setDetectionScore(Math.min(score, 100));
     
     const debug = `Face: Brightness=${avgBrightness.toFixed(0)} Content=${(contentRatio*100).toFixed(0)}% Skin=${(skinRatio*100).toFixed(0)}% Dark=${(darkRatio*100).toFixed(0)}% Score=${score}`;
     setDebugInfo(debug);
     console.log(debug, 'Detected:', detected);
-  }, []);
+  }, [setIsDetected, setDetectionScore, setDebugInfo]);
 
   // Simple thumb detection  
   const detectThumbSimple = useCallback((data, width, height) => {
+    // Add safety check for dimensions
+    if (width <= 0 || height <= 0 || !data || data.length === 0) {
+      setIsDetected(false);
+      setDetectionScore(0);
+      setDebugInfo('Invalid video dimensions or data');
+      return;
+    }
+    
     const centerX = width / 2;
     const centerY = height / 2;
     const radius = Math.min(width, height) * 0.35;
@@ -161,34 +190,36 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
     let darkPixels = 0;
     let totalBrightness = 0;
     
-    // Sample pixels in the circular area
-    for (let y = Math.max(0, centerY - radius); y < Math.min(height, centerY + radius); y += 2) {
-      for (let x = Math.max(0, centerX - radius); x < Math.min(width, centerX + radius); x += 2) {
+    // Sample pixels in the circular area (skip pixels for performance)
+    for (let y = Math.max(0, Math.floor(centerY - radius)); y < Math.min(height, Math.ceil(centerY + radius)); y += 3) {
+      for (let x = Math.max(0, Math.floor(centerX - radius)); x < Math.min(width, Math.ceil(centerX + radius)); x += 3) {
         const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
         
         if (distance < radius) {
-          const i = (Math.floor(y) * width + Math.floor(x)) * 4;
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          
-          const brightness = (r + g + b) / 3;
-          totalBrightness += brightness;
-          totalPixels++;
-          
-          // Content check
-          if (brightness > 40 && brightness < 200) {
-            contentPixels++;
-          }
-          
-          // Skin detection for thumb
-          if (r > 80 && g > 50 && b > 30 && r > g && r > b) {
-            skinPixels++;
-          }
-          
-          // Thumb ridges (darker areas)
-          if (brightness < 120) {
-            darkPixels++;
+          const i = (y * width + x) * 4;
+          if (i + 3 < data.length) {
+            const r = data[i] || 0;
+            const g = data[i + 1] || 0;
+            const b = data[i + 2] || 0;
+            
+            const brightness = (r + g + b) / 3;
+            totalBrightness += brightness;
+            totalPixels++;
+            
+            // Content check (more lenient)
+            if (brightness > 30 && brightness < 220) {
+              contentPixels++;
+            }
+            
+            // Relaxed skin detection for thumb
+            if (r > 60 && g > 35 && b > 20 && r >= g && r >= b) {
+              skinPixels++;
+            }
+            
+            // Thumb ridges (darker areas)
+            if (brightness < 140) {
+              darkPixels++;
+            }
           }
         }
       }
@@ -197,7 +228,7 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
     if (totalPixels === 0) {
       setIsDetected(false);
       setDetectionScore(0);
-      setDebugInfo('No pixels to analyze');
+      setDebugInfo('No pixels in detection area');
       return;
     }
     
@@ -206,62 +237,91 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
     const skinRatio = skinPixels / totalPixels;
     const darkRatio = darkPixels / totalPixels;
     
-    // Simplified scoring 
+    // More lenient scoring 
     let score = 0;
     
-    // Good lighting (40 points)
-    if (avgBrightness > 70 && avgBrightness < 160) {
-      score += 40;
-    } else if (avgBrightness > 50 && avgBrightness < 180) {
+    // Good lighting (35 points)
+    if (avgBrightness > 60 && avgBrightness < 170) {
+      score += 35;
+    } else if (avgBrightness > 40 && avgBrightness < 200) {
       score += 20;
     }
     
-    // Content presence (30 points)
-    if (contentRatio > 0.8) {
-      score += 30;
-    } else if (contentRatio > 0.6) {
-      score += 15;
+    // Content presence (35 points)
+    if (contentRatio > 0.7) {
+      score += 35;
+    } else if (contentRatio > 0.5) {
+      score += 20;
     }
     
     // Skin tone (20 points)
-    if (skinRatio > 0.2) {
+    if (skinRatio > 0.15) {
       score += 20;
-    } else if (skinRatio > 0.1) {
+    } else if (skinRatio > 0.08) {
       score += 10;
     }
     
     // Fingerprint ridges (10 points)
-    if (darkRatio > 0.2 && darkRatio < 0.6) {
+    if (darkRatio > 0.15 && darkRatio < 0.7) {
       score += 10;
     }
     
-    const detected = score >= 60; // Lower threshold for easier detection
+    const detected = score >= 40; // Much lower threshold for easier detection!
     setIsDetected(detected);
     setDetectionScore(Math.min(score, 100));
     
     const debug = `Thumb: Brightness=${avgBrightness.toFixed(0)} Content=${(contentRatio*100).toFixed(0)}% Skin=${(skinRatio*100).toFixed(0)}% Dark=${(darkRatio*100).toFixed(0)}% Score=${score}`;
     setDebugInfo(debug);
     console.log(debug, 'Detected:', detected);
-  }, []);
+  }, [setIsDetected, setDetectionScore, setDebugInfo]);
 
   // Start detection when component mounts
   useEffect(() => {
     console.log(`Starting detection for ${type}`);
     
-    const startDetection = () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      
-      intervalRef.current = setInterval(() => {
-        performDetection();
-      }, 200); // Check every 200ms
+    const checkVideoReadiness = () => {
+      if (
+        webcamRef.current?.video &&
+        webcamRef.current.video.readyState >= 3 &&
+        webcamRef.current.video.videoWidth > 0 &&
+        webcamRef.current.video.videoHeight > 0
+      ) {
+        console.log('Video ready, starting detection');
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        
+        intervalRef.current = setInterval(() => {
+          performDetection();
+        }, 300); // Check every 300ms for better performance
+        return true;
+      }
+      return false;
     };
     
-    // Start after a brief delay to ensure video is ready
-    const timer = setTimeout(startDetection, 1000);
+    // Check immediately, then retry every 500ms until ready
+    if (!checkVideoReadiness()) {
+      const readyCheckInterval = setInterval(() => {
+        if (checkVideoReadiness()) {
+          clearInterval(readyCheckInterval);
+        }
+      }, 500);
+      
+      // Fallback timeout
+      const fallbackTimer = setTimeout(() => {
+        clearInterval(readyCheckInterval);
+        console.log('Fallback: Starting detection anyway');
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = setInterval(performDetection, 300);
+      }, 5000);
+      
+      return () => {
+        clearInterval(readyCheckInterval);
+        clearTimeout(fallbackTimer);
+        if (intervalRef.current) clearInterval(intervalRef.current);
+      };
+    }
     
     return () => {
       console.log(`Stopping detection for ${type}`);
-      clearTimeout(timer);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
@@ -280,10 +340,10 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
 
   // Auto capture when detected
   useEffect(() => {
-    if (isDetected && detectionScore > 70) {
+    if (isDetected && detectionScore > 40) {
       const timer = setTimeout(() => {
         captureImage();
-      }, 2000); // Wait 2 seconds after good detection
+      }, 1500); // Wait 1.5 seconds after good detection
       
       return () => clearTimeout(timer);
     }
