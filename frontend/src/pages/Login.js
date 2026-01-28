@@ -4,7 +4,7 @@ import { Container, Paper, TextField, Button, Typography, Box, Alert, Tab, Tabs,
 import { Fingerprint, Face, Lock, Person, CameraAlt, Upload, Visibility, VisibilityOff } from '@mui/icons-material';
 import { authService } from '../services/api';
 import HardwareFingerprintScanner from '../components/HardwareFingerprintScanner';
-import BiometricCaptureNew from '../components/BiometricCaptureNew';
+import BiometricTest from '../components/BiometricTest';
 
 function TabPanel({ children, value, index }) {
   return <div hidden={value !== index}>{value === index && <Box sx={{ p: 3 }}>{children}</Box>}</div>;
@@ -318,7 +318,7 @@ function Login({ setIsAuthenticated }) {
               }
             }} />
             {showWebcam && (
-              <BiometricCaptureNew 
+              <BiometricTest 
                 type="face"
                 onCapture={(imageData) => {
                   setFaceImage(imageData);
@@ -424,7 +424,7 @@ function Login({ setIsAuthenticated }) {
                   }
                 }} />
                 {showFpWebcam && (
-                  <BiometricCaptureNew 
+                  <BiometricTest 
                     type="thumb"
                     onCapture={(imageData) => {
                       setFingerprintImage(imageData);

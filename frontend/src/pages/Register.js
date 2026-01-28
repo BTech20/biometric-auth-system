@@ -5,7 +5,7 @@ import { CameraAlt, Upload, Person, Email, Lock, Visibility, VisibilityOff, HowT
 import { authService } from '../services/api';
 import HardwareFingerprintScanner from '../components/HardwareFingerprintScanner';
 import ImageQualityCheck from '../components/ImageQualityCheck';
-import BiometricCaptureNew from '../components/BiometricCaptureNew';
+import BiometricTest from '../components/BiometricTest';
 
 const steps = ['Account Details', 'Face Capture', 'Fingerprint Scan'];
 
@@ -229,7 +229,7 @@ function Register({ setIsAuthenticated }) {
                 }
               }} />
               {showWebcam && (
-                <BiometricCaptureNew 
+                <BiometricTest 
                   type="face"
                   onCapture={(imageData) => {
                     setFaceImage(imageData);
@@ -321,7 +321,7 @@ function Register({ setIsAuthenticated }) {
                     }
                   }} />
                   {showFpWebcam && (
-                    <BiometricCaptureNew 
+                    <BiometricTest 
                       type="thumb"
                       onCapture={(imageData) => {
                         setFingerprintImage(imageData);
