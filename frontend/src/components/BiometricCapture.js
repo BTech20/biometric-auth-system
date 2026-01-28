@@ -26,7 +26,7 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
         const canvas = canvasRef.current;
         
         if (!canvas) {
-          console.log('Canvas not available');
+          console.log('❌ Canvas not available');
           return;
         }
         
@@ -35,9 +35,11 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
         canvas.height = video.videoHeight;
         
         if (canvas.width <= 0 || canvas.height <= 0) {
-          console.log('Invalid canvas dimensions:', canvas.width, 'x', canvas.height);
+          console.log(`❌ Invalid canvas dimensions: ${canvas.width}x${canvas.height}`);
           return;
         }
+        
+        console.log(`🎥 Processing ${type} detection: ${canvas.width}x${canvas.height}`);
         
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -55,10 +57,10 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
         const readyState = webcamRef.current?.video?.readyState || 'no video';
         const videoWidth = webcamRef.current?.video?.videoWidth || 0;
         const videoHeight = webcamRef.current?.video?.videoHeight || 0;
-        console.log(`Video not ready - State: ${readyState}, Dimensions: ${videoWidth}x${videoHeight}`);
+        console.log(`⏳ Video not ready - State: ${readyState}, Dimensions: ${videoWidth}x${videoHeight}`);
       }
     } catch (error) {
-      console.error('Detection error:', error);
+      console.error('💥 Detection error:', error);
       setDebugInfo(`Error: ${error.message}`);
     }
   }, [type, detectFaceSimple, detectThumbSimple]);
@@ -161,13 +163,13 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
       score += 10;
     }
     
-    const detected = score >= 45; // Much lower threshold!
+    const detected = score >= 30; // Even lower threshold for testing!
     setIsDetected(detected);
     setDetectionScore(Math.min(score, 100));
     
     const debug = `Face: Brightness=${avgBrightness.toFixed(0)} Content=${(contentRatio*100).toFixed(0)}% Skin=${(skinRatio*100).toFixed(0)}% Dark=${(darkRatio*100).toFixed(0)}% Score=${score}`;
     setDebugInfo(debug);
-    console.log(debug, 'Detected:', detected);
+    console.log(`🔍 ${debug} -> Detected: ${detected}`);
   }, [setIsDetected, setDetectionScore, setDebugInfo]);
 
   // Simple thumb detection  
@@ -266,13 +268,13 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
       score += 10;
     }
     
-    const detected = score >= 40; // Much lower threshold for easier detection!
+    const detected = score >= 25; // Even lower threshold for testing!
     setIsDetected(detected);
     setDetectionScore(Math.min(score, 100));
     
     const debug = `Thumb: Brightness=${avgBrightness.toFixed(0)} Content=${(contentRatio*100).toFixed(0)}% Skin=${(skinRatio*100).toFixed(0)}% Dark=${(darkRatio*100).toFixed(0)}% Score=${score}`;
     setDebugInfo(debug);
-    console.log(debug, 'Detected:', detected);
+    console.log(`👍 ${debug} -> Detected: ${detected}`);
   }, [setIsDetected, setDetectionScore, setDebugInfo]);
 
   // Start detection when component mounts
@@ -340,12 +342,21 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
 
   // Auto capture when detected
   useEffect(() => {
-    if (isDetected && detectionScore > 40) {
+    console.log(`Auto-capture check: isDetected=${isDetected}, score=${detectionScore}`);
+    
+    if (isDetected && detectionScore > 30) { // Lowered threshold even more
+      console.log(`🎯 Auto-capture triggered! Score: ${detectionScore}`);
       const timer = setTimeout(() => {
+        console.log('📸 Auto-capturing now...');
         captureImage();
-      }, 1500); // Wait 1.5 seconds after good detection
+      }, 1000); // Reduced wait time to 1 second
       
-      return () => clearTimeout(timer);
+      return () => {
+        console.log('⏹️ Auto-capture timer cleared');
+        clearTimeout(timer);
+      };
+    } else {
+      console.log(`❌ Auto-capture conditions not met: detected=${isDetected}, score=${detectionScore}`);
     }
   }, [isDetected, detectionScore, captureImage]);
 
@@ -456,8 +467,8 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
             }}
           >
             {isDetected ? 
-              `✓ ${type.toUpperCase()} DETECTED (${Math.round(detectionScore)}%)` : 
-              `Position your ${type} in the ${type === 'face' ? 'oval' : 'circle'}`
+              `✓ ${type.toUpperCase()} DETECTED (${Math.round(detectionScore)}%) - AUTO-CAPTURE IN 1s` : 
+              `Position your ${type} in the ${type === 'face' ? 'oval' : 'circle'} (Score: ${Math.round(detectionScore)}%)`
             }
           </Typography>
         </Box>
