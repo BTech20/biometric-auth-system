@@ -5,7 +5,7 @@ import { CameraAlt, Upload, Person, Email, Lock, Visibility, VisibilityOff, HowT
 import { authService } from '../services/api';
 import HardwareFingerprintScanner from '../components/HardwareFingerprintScanner';
 import ImageQualityCheck from '../components/ImageQualityCheck';
-import BiometricTest from '../components/BiometricTest';
+import BiometricSimple from '../components/BiometricSimple';
 
 const steps = ['Account Details', 'Face Capture', 'Fingerprint Scan'];
 
@@ -28,7 +28,13 @@ function Register({ setIsAuthenticated }) {
   const faceUploadRef = useRef(null);
   const fpUploadRef = useRef(null);
 
+  // Debug logging for showWebcam state changes
+  useEffect(() => {
+    console.log('🔄 showWebcam changed to:', showWebcam);
+  }, [showWebcam]);
+
   const handleNext = () => {
+    console.log('🔄 Register handleNext called, activeStep:', activeStep);
     if (activeStep === 0 && (!username || !email || !password)) {
       setError('Fill all fields');
       return;
@@ -216,7 +222,10 @@ function Register({ setIsAuthenticated }) {
                     }
                   }
                 }}>
-                  <Button startIcon={<CameraAlt />} onClick={() => setShowWebcam(true)}>Capture Face</Button>
+                  <Button startIcon={<CameraAlt />} onClick={() => {
+                    console.log('🎥 Capture Face button clicked');
+                    setShowWebcam(true);
+                  }}>Capture Face</Button>
                   <Button startIcon={<Upload />} onClick={() => faceUploadRef.current.click()}>Upload Image</Button>
                 </ButtonGroup>
               )}
@@ -229,14 +238,21 @@ function Register({ setIsAuthenticated }) {
                 }
               }} />
               {showWebcam && (
-                <BiometricTest 
-                  type="face"
-                  onCapture={(imageData) => {
-                    setFaceImage(imageData);
-                    setShowWebcam(false);
-                  }}
-                  onCancel={() => setShowWebcam(false)}
-                />
+                <>
+                  {console.log('🎬 Rendering BiometricSimple component')}
+                  <BiometricSimple 
+                    type="face"
+                    onCapture={(imageData) => {
+                      console.log('📸 onCapture called with:', imageData);
+                      setFaceImage(imageData);
+                      setShowWebcam(false);
+                    }}
+                    onCancel={() => {
+                      console.log('❌ onCancel called');
+                      setShowWebcam(false);
+                    }}
+                  />
+                </>
               )}
               {faceImage && !showWebcam && (
                 <Box sx={{ mb: 2 }}>
