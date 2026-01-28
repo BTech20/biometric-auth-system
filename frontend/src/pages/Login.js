@@ -74,6 +74,38 @@ function Login({ setIsAuthenticated }) {
       py: 4
     }}>
       <Container maxWidth="sm">
+        {/* Sign-In Prompt Banner */}
+        <Fade in timeout={600}>
+          <Alert 
+            severity="info" 
+            sx={{ 
+              mb: 3,
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)',
+              border: '2px solid #2196f3',
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: '1rem',
+              p: 2.5,
+              '& .MuiAlert-icon': {
+                color: '#fff',
+                fontSize: '2rem',
+                mr: 2
+              },
+              boxShadow: '0 4px 20px rgba(33,150,243,0.3)'
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: '#fff' }}>
+              🔐 Sign In to Access Biometric Verification
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+              Choose your preferred authentication method below:
+              <br/>• <strong>Password</strong> - Traditional username/password login
+              <br/>• <strong>Biometric</strong> - Secure face and fingerprint verification
+            </Typography>
+          </Alert>
+        </Fade>
+        
         <Fade in timeout={800}>
           <Paper sx={{ 
             p: 4, 
@@ -140,6 +172,20 @@ function Login({ setIsAuthenticated }) {
             </Tabs>
             
             <TabPanel value={tabValue} index={0}>
+              <Alert 
+                severity="info" 
+                sx={{ 
+                  mb: 3,
+                  borderRadius: 2,
+                  bgcolor: 'rgba(33,150,243,0.1)',
+                  border: '1px solid #2196f3',
+                  color: '#fff'
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  💡 Enter your username and password to sign in
+                </Typography>
+              </Alert>
               <form onSubmit={handlePasswordLogin}>
                 <TextField 
                   fullWidth 
@@ -220,6 +266,25 @@ function Login({ setIsAuthenticated }) {
             </TabPanel>
           
           <TabPanel value={tabValue} index={1}>
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mb: 3,
+                borderRadius: 2,
+                bgcolor: 'rgba(76,175,80,0.1)',
+                border: '1px solid #4caf50',
+                color: '#fff'
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                🔐 Biometric Sign In
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', lineHeight: 1.6 }}>
+                Capture your face and fingerprint to sign in securely.
+                <br/>
+                Make sure to position yourself clearly in the frame guides.
+              </Typography>
+            </Alert>
             <Typography variant="h6" sx={{ mb: 2, color: '#fff', fontWeight: 700, fontSize: '1.1rem' }}>1. Face Verification</Typography>
             {!showWebcam && !faceImage && (
               <ButtonGroup fullWidth variant="outlined" sx={{ 
@@ -253,8 +318,100 @@ function Login({ setIsAuthenticated }) {
               }
             }} />
             {showWebcam && (
-              <Box sx={{ mb: 2 }}>
-                <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" width="100%" />
+              <Box sx={{ mb: 2, border: '2px solid #00ff88', borderRadius: 2, p: 1, bgcolor: '#000', position: 'relative' }}>
+                <Box sx={{ position: 'relative', width: '100%', paddingBottom: '75%' }}>
+                  <Webcam 
+                    audio={false} 
+                    ref={webcamRef} 
+                    screenshotFormat="image/jpeg" 
+                    width="100%"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  {/* Face Boundary Guide - Oval Frame */}
+                  <svg 
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      pointerEvents: 'none',
+                      borderRadius: '8px',
+                      zIndex: 10
+                    }}
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                  >
+                    {/* Darken edges */}
+                    <rect width="100" height="100" fill="rgba(0,0,0,0.4)" />
+                    
+                    {/* Face Guide - Oval cutout */}
+                    <ellipse 
+                      cx="50" 
+                      cy="50" 
+                      rx="32" 
+                      ry="42" 
+                      fill="none" 
+                      stroke="#00ff88" 
+                      strokeWidth="1.5"
+                      strokeDasharray="5,5"
+                    />
+                    
+                    {/* Corner guides */}
+                    <circle cx="50" cy="15" r="2" fill="#00ff88" />
+                    <circle cx="50" cy="85" r="2" fill="#00ff88" />
+                    <circle cx="18" cy="50" r="2" fill="#00ff88" />
+                    <circle cx="82" cy="50" r="2" fill="#00ff88" />
+                  </svg>
+                </Box>
+                
+                {/* Positioning Tips */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 1,
+                  mt: 2,
+                  mb: 2
+                }}>
+                  <Box sx={{ 
+                    bgcolor: 'rgba(0,255,136,0.1)',
+                    border: '1px solid #00ff88',
+                    p: 1.5,
+                    borderRadius: 1,
+                    fontSize: '0.85rem',
+                    color: '#00ff88'
+                  }}>
+                    <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, mb: 0.5 }}>
+                      ✓ Good Position
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+                      • Face centered<br/>• Good lighting<br/>• Eyes open<br/>• Neutral look
+                    </Typography>
+                  </Box>
+                  <Box sx={{ 
+                    bgcolor: 'rgba(255,68,68,0.1)',
+                    border: '1px solid #ff4444',
+                    p: 1.5,
+                    borderRadius: 1,
+                    fontSize: '0.85rem',
+                    color: '#ff9999'
+                  }}>
+                    <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, mb: 0.5 }}>
+                      ✗ Avoid
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+                      • Too dark/bright<br/>• Off-center<br/>• Blurry image<br/>• Extreme angles
+                    </Typography>
+                  </Box>
+                </Box>
+                
                 <ButtonGroup fullWidth sx={{ mt: 1 }}>
                   <Button 
                     variant="contained" 
@@ -267,7 +424,7 @@ function Login({ setIsAuthenticated }) {
                       '&:hover': { bgcolor: '#00cc6a' }
                     }}
                   >
-                    Capture
+                    ✓ Capture Face
                   </Button>
                   <Button 
                     variant="outlined" 
@@ -391,7 +548,111 @@ function Login({ setIsAuthenticated }) {
                         Hold your thumb clearly in front of the camera, then click "Capture Thumb"
                       </Typography>
                     </Alert>
-                    <Webcam audio={false} ref={fpWebcamRef} screenshotFormat="image/jpeg" width="100%" />
+                    <Box sx={{ position: 'relative', width: '100%', paddingBottom: '75%', bgcolor: '#000', borderRadius: 1, overflow: 'hidden' }}>
+                      <Webcam 
+                        audio={false} 
+                        ref={fpWebcamRef} 
+                        screenshotFormat="image/jpeg" 
+                        width="100%"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%'
+                        }}
+                      />
+                      {/* Fingerprint Boundary Guide - Circular Frame */}
+                      <svg 
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          pointerEvents: 'none',
+                          zIndex: 10
+                        }}
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
+                      >
+                        {/* Darken edges */}
+                        <rect width="100" height="100" fill="rgba(0,0,0,0.4)" />
+                        
+                        {/* Circular guide for thumb */}
+                        <circle 
+                          cx="50" 
+                          cy="50" 
+                          r="35" 
+                          fill="none" 
+                          stroke="#ff9800" 
+                          strokeWidth="1.5"
+                          strokeDasharray="5,5"
+                        />
+                        
+                        {/* Center dot */}
+                        <circle cx="50" cy="50" r="2" fill="#ff9800" />
+                        
+                        {/* Directional markers */}
+                        <text 
+                          x="50" 
+                          y="12" 
+                          textAnchor="middle" 
+                          fill="#ff9800" 
+                          fontSize="4"
+                          fontWeight="bold"
+                        >
+                          ↑ PLACE THUMB HERE
+                        </text>
+                        
+                        {/* Corner guides */}
+                        <circle cx="20" cy="20" r="1.5" fill="#ff9800" />
+                        <circle cx="80" cy="20" r="1.5" fill="#ff9800" />
+                        <circle cx="20" cy="80" r="1.5" fill="#ff9800" />
+                        <circle cx="80" cy="80" r="1.5" fill="#ff9800" />
+                      </svg>
+                    </Box>
+                    
+                    {/* Positioning Tips */}
+                    <Box sx={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: 1,
+                      mt: 2,
+                      mb: 2
+                    }}>
+                      <Box sx={{ 
+                        bgcolor: 'rgba(255,152,0,0.1)',
+                        border: '1px solid #ff9800',
+                        p: 1.5,
+                        borderRadius: 1,
+                        fontSize: '0.85rem',
+                        color: '#ff9800'
+                      }}>
+                        <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, mb: 0.5 }}>
+                          ✓ Good Position
+                        </Typography>
+                        <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+                          • Thumb centered<br/>• Flat surface<br/>• Clear ridges<br/>• Steady
+                        </Typography>
+                      </Box>
+                      <Box sx={{ 
+                        bgcolor: 'rgba(255,68,68,0.1)',
+                        border: '1px solid #ff4444',
+                        p: 1.5,
+                        borderRadius: 1,
+                        fontSize: '0.85rem',
+                        color: '#ff9999'
+                      }}>
+                        <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, mb: 0.5 }}>
+                          ✗ Avoid
+                        </Typography>
+                        <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+                          • Angled thumb<br/>• Blurry image<br/>• Too dark/light<br/>• Off-center
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
                     <ButtonGroup fullWidth sx={{ mt: 1 }}>
                       <Button 
                         variant="contained" 
@@ -400,16 +661,16 @@ function Login({ setIsAuthenticated }) {
                           setShowFpWebcam(false); 
                         }}
                         sx={{
-                          bgcolor: '#00ff88',
+                          bgcolor: '#ff9800',
                           color: '#000',
                           py: 1.5,
                           fontWeight: 700,
                           '&:hover': {
-                            bgcolor: '#00cc6a'
+                            bgcolor: '#f57c00'
                           }
                         }}
                       >
-                        Capture Thumb
+                        ✓ Capture Thumb
                       </Button>
                       <Button 
                         variant="outlined" 
@@ -421,7 +682,7 @@ function Login({ setIsAuthenticated }) {
                           fontWeight: 600,
                           '&:hover': { 
                             borderColor: '#cc0000', 
-                            bgcolor: 'rgba(255,68,68,0.1)' 
+                            bgcolor: 'rgba(255,68,68,0.1)'
                           }
                         }}
                       >

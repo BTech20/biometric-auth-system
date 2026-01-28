@@ -229,8 +229,100 @@ function Register({ setIsAuthenticated }) {
                 }
               }} />
               {showWebcam && (
-                <Box sx={{ mb: 2 }}>
-                  <Webcam audio={false} ref={webcamRef} width="100%" screenshotFormat="image/jpeg" />
+                <Box sx={{ mb: 2, border: '2px solid #00ff88', borderRadius: 2, p: 1, bgcolor: '#000', position: 'relative' }}>
+                  <Box sx={{ position: 'relative', width: '100%', paddingBottom: '75%' }}>
+                    <Webcam 
+                      audio={false} 
+                      ref={webcamRef} 
+                      width="100%" 
+                      screenshotFormat="image/jpeg"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    {/* Face Boundary Guide - Oval Frame */}
+                    <svg 
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        pointerEvents: 'none',
+                        borderRadius: '8px',
+                        zIndex: 10
+                      }}
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                    >
+                      {/* Darken edges */}
+                      <rect width="100" height="100" fill="rgba(0,0,0,0.4)" />
+                      
+                      {/* Face Guide - Oval cutout */}
+                      <ellipse 
+                        cx="50" 
+                        cy="50" 
+                        rx="32" 
+                        ry="42" 
+                        fill="none" 
+                        stroke="#00ff88" 
+                        strokeWidth="1.5"
+                        strokeDasharray="5,5"
+                      />
+                      
+                      {/* Corner guides */}
+                      <circle cx="50" cy="15" r="2" fill="#00ff88" />
+                      <circle cx="50" cy="85" r="2" fill="#00ff88" />
+                      <circle cx="18" cy="50" r="2" fill="#00ff88" />
+                      <circle cx="82" cy="50" r="2" fill="#00ff88" />
+                    </svg>
+                  </Box>
+                  
+                  {/* Positioning Tips */}
+                  <Box sx={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 1,
+                    mt: 2,
+                    mb: 2
+                  }}>
+                    <Box sx={{ 
+                      bgcolor: 'rgba(0,255,136,0.1)',
+                      border: '1px solid #00ff88',
+                      p: 1.5,
+                      borderRadius: 1,
+                      fontSize: '0.85rem',
+                      color: '#00ff88'
+                    }}>
+                      <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, mb: 0.5 }}>
+                        ✓ Good Position
+                      </Typography>
+                      <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+                        • Face centered<br/>• Good lighting<br/>• Eyes open<br/>• Neutral look
+                      </Typography>
+                    </Box>
+                    <Box sx={{ 
+                      bgcolor: 'rgba(255,68,68,0.1)',
+                      border: '1px solid #ff4444',
+                      p: 1.5,
+                      borderRadius: 1,
+                      fontSize: '0.85rem',
+                      color: '#ff9999'
+                    }}>
+                      <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, mb: 0.5 }}>
+                        ✗ Avoid
+                      </Typography>
+                      <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+                        • Too dark/bright<br/>• Off-center<br/>• Blurry image<br/>• Extreme angles
+                      </Typography>
+                    </Box>
+                  </Box>
+                  
                   <ButtonGroup fullWidth sx={{ mt: 1 }}>
                     <Button 
                       variant="contained" 
@@ -242,7 +334,7 @@ function Register({ setIsAuthenticated }) {
                         '&:hover': { bgcolor: '#00cc6a' }
                       }}
                     >
-                      Capture
+                      ✓ Capture Face
                     </Button>
                     <Button 
                       variant="outlined" 
@@ -347,7 +439,111 @@ function Register({ setIsAuthenticated }) {
                           Hold your thumb clearly in front of the camera, then click "Capture Thumb"
                         </Typography>
                       </Alert>
-                      <Webcam audio={false} ref={fpWebcamRef} width="100%" screenshotFormat="image/jpeg" />
+                      <Box sx={{ position: 'relative', width: '100%', paddingBottom: '75%', bgcolor: '#000', borderRadius: 1, overflow: 'hidden' }}>
+                        <Webcam 
+                          audio={false} 
+                          ref={fpWebcamRef} 
+                          width="100%" 
+                          screenshotFormat="image/jpeg"
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%'
+                          }}
+                        />
+                        {/* Fingerprint Boundary Guide - Circular Frame */}
+                        <svg 
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            pointerEvents: 'none',
+                            zIndex: 10
+                          }}
+                          viewBox="0 0 100 100"
+                          preserveAspectRatio="none"
+                        >
+                          {/* Darken edges */}
+                          <rect width="100" height="100" fill="rgba(0,0,0,0.4)" />
+                          
+                          {/* Circular guide for thumb */}
+                          <circle 
+                            cx="50" 
+                            cy="50" 
+                            r="35" 
+                            fill="none" 
+                            stroke="#ff9800" 
+                            strokeWidth="1.5"
+                            strokeDasharray="5,5"
+                          />
+                          
+                          {/* Center dot */}
+                          <circle cx="50" cy="50" r="2" fill="#ff9800" />
+                          
+                          {/* Directional markers */}
+                          <text 
+                            x="50" 
+                            y="12" 
+                            textAnchor="middle" 
+                            fill="#ff9800" 
+                            fontSize="4"
+                            fontWeight="bold"
+                          >
+                            ↑ PLACE THUMB HERE
+                          </text>
+                          
+                          {/* Corner guides */}
+                          <circle cx="20" cy="20" r="1.5" fill="#ff9800" />
+                          <circle cx="80" cy="20" r="1.5" fill="#ff9800" />
+                          <circle cx="20" cy="80" r="1.5" fill="#ff9800" />
+                          <circle cx="80" cy="80" r="1.5" fill="#ff9800" />
+                        </svg>
+                      </Box>
+                      
+                      {/* Positioning Tips */}
+                      <Box sx={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: 1,
+                        mt: 2,
+                        mb: 2
+                      }}>
+                        <Box sx={{ 
+                          bgcolor: 'rgba(255,152,0,0.1)',
+                          border: '1px solid #ff9800',
+                          p: 1.5,
+                          borderRadius: 1,
+                          fontSize: '0.85rem',
+                          color: '#ff9800'
+                        }}>
+                          <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, mb: 0.5 }}>
+                            ✓ Good Position
+                          </Typography>
+                          <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+                            • Thumb centered<br/>• Flat surface<br/>• Clear ridges<br/>• Steady
+                          </Typography>
+                        </Box>
+                        <Box sx={{ 
+                          bgcolor: 'rgba(255,68,68,0.1)',
+                          border: '1px solid #ff4444',
+                          p: 1.5,
+                          borderRadius: 1,
+                          fontSize: '0.85rem',
+                          color: '#ff9999'
+                        }}>
+                          <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, mb: 0.5 }}>
+                            ✗ Avoid
+                          </Typography>
+                          <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+                            • Angled thumb<br/>• Blurry image<br/>• Too dark/light<br/>• Off-center
+                          </Typography>
+                        </Box>
+                      </Box>
+                      
                       <ButtonGroup fullWidth sx={{ mt: 1 }}>
                         <Button 
                           variant="contained" 
@@ -356,14 +552,14 @@ function Register({ setIsAuthenticated }) {
                             setShowFpWebcam(false); 
                           }}
                           sx={{
-                            bgcolor: '#00ff88',
+                            bgcolor: '#ff9800',
                             color: '#000',
                             py: 1.5,
                             fontWeight: 700,
-                            '&:hover': { bgcolor: '#00cc6a' }
+                            '&:hover': { bgcolor: '#f57c00' }
                           }}
                         >
-                          Capture Thumb
+                          ✓ Capture Thumb
                         </Button>
                         <Button 
                           variant="outlined" 
