@@ -1,47 +1,19 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Box, Typography, ButtonGroup, Button, Alert } from '@mui/material';
 import Webcam from 'react-webcam';
-import * as faceapi from 'face-api.js';
 
 function BiometricCapture({ type = 'face', onCapture, onCancel }) {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const intervalRef = useRef(null);
-  const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [isDetected, setIsDetected] = useState(false);
   const [detectionScore, setDetectionScore] = useState(0);
+  const [debugInfo, setDebugInfo] = useState('');
 
-  // Load face detection models
-  useEffect(() => {
-    const loadModels = async () => {
-      if (type === 'face') {
-        try {
-          // Try loading models from CDN first, then fallback to local
-          const MODEL_URL = process.env.NODE_ENV === 'production' 
-            ? 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
-            : '/models';
-          
-          console.log('Loading face detection models from:', MODEL_URL);
-          await Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
-          ]);
-          console.log('Face detection models loaded successfully');
-          setIsModelLoaded(true);
-        } catch (error) {
-          console.warn('Failed to load face-api.js models, using fallback detection:', error);
-          // Always set model loaded to true to use fallback detection
-          setIsModelLoaded(true);
-        }
-      } else {
-        setIsModelLoaded(true);
-      }
-    };
-    loadModels();
-  }, [type]);
+  console.log(`BiometricCapture initialized for type: ${type}`);
 
-  // Face detection function
-  const detectFace = useCallback(async () => {
+  // Simple and reliable detection function
+  const performDetection = useCallback(() => {
     if (
       webcamRef.current &&
       webcamRef.current.video &&
@@ -50,368 +22,297 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
       const video = webcamRef.current.video;
       const canvas = canvasRef.current;
       
-      if (!canvas) return;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-
-      try {
-        // Try face-api.js detection first if available
-        if (typeof faceapi !== 'undefined' && faceapi.nets && faceapi.nets.tinyFaceDetector) {
-          const detections = await faceapi.detectAllFaces(
-            video,
-            new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 })
-          );
-
-          if (detections && detections.length > 0) {
-            const detection = detections[0];
-            const { x, y, width, height } = detection.box;
-            
-            // Check if face is in the center area (our oval guide)
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const faceCenter = { x: x + width / 2, y: y + height / 2 };
-            
-            // Define acceptable area (oval bounds)
-            const ovalWidth = canvas.width * 0.64; // 32*2 from SVG
-            const ovalHeight = canvas.height * 0.84; // 42*2 from SVG
-            
-            const isInBounds = (
-              Math.abs(faceCenter.x - centerX) < ovalWidth / 2 &&
-              Math.abs(faceCenter.y - centerY) < ovalHeight / 2 &&
-              width > canvas.width * 0.15 && // Minimum face size
-              height > canvas.height * 0.15
-            );
-            
-            setIsDetected(isInBounds);
-            setDetectionScore(Math.min(detection.score * 100, 100));
-            console.log('Face-api detection:', isInBounds, detection.score);
-            return;
-          }
-        }
-      } catch (error) {
-        console.warn('Face-api.js detection failed, using fallback:', error);
+      if (!canvas) {
+        console.log('Canvas not available');
+        return;
       }
       
-      // Enhanced fallback detection
-      await enhancedFaceDetection(video, canvas);
+      try {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        if (type === 'face') {
+          detectFaceSimple(data, canvas.width, canvas.height);
+        } else {
+          detectThumbSimple(data, canvas.width, canvas.height);
+        }
+        
+      } catch (error) {
+        console.error('Detection error:', error);
+        setDebugInfo(`Error: ${error.message}`);
+      }
+    } else {
+      console.log('Video not ready, readyState:', webcamRef.current?.video?.readyState);
     }
-  }, []);
+  }, [type]);
 
-  // Enhanced fallback face detection using better computer vision
-  const enhancedFaceDetection = useCallback(async (video, canvas) => {
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  // Simple face detection
+  const detectFaceSimple = useCallback((data, width, height) => {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const ovalRadiusX = width * 0.32;
+    const ovalRadiusY = height * 0.42;
     
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    
-    // Define the oval detection area matching our SVG guide
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const ovalRadiusX = canvas.width * 0.32; // 32% from SVG
-    const ovalRadiusY = canvas.height * 0.42; // 42% from SVG
-    
-    let totalBrightness = 0;
+    let totalPixels = 0;
+    let contentPixels = 0;
+    let skinPixels = 0;
     let darkPixels = 0;
-    let edgePixels = 0;
-    let skinTonePixels = 0;
-    let totalPixelsInOval = 0;
+    let totalBrightness = 0;
     
-    // Analyze pixels within the oval area
-    for (let y = 0; y < canvas.height; y++) {
-      for (let x = 0; x < canvas.width; x++) {
-        // Check if pixel is within oval bounds
+    // Sample pixels in the oval area
+    for (let y = Math.max(0, centerY - ovalRadiusY); y < Math.min(height, centerY + ovalRadiusY); y += 3) {
+      for (let x = Math.max(0, centerX - ovalRadiusX); x < Math.min(width, centerX + ovalRadiusX); x += 3) {
         const normalizedX = (x - centerX) / ovalRadiusX;
         const normalizedY = (y - centerY) / ovalRadiusY;
         
         if (normalizedX * normalizedX + normalizedY * normalizedY <= 1) {
-          const i = (y * canvas.width + x) * 4;
+          const i = (Math.floor(y) * width + Math.floor(x)) * 4;
           const r = data[i];
           const g = data[i + 1];
           const b = data[i + 2];
           
           const brightness = (r + g + b) / 3;
           totalBrightness += brightness;
-          totalPixelsInOval++;
+          totalPixels++;
           
-          // Detect skin tone (simplified heuristic)
-          if (r > 95 && g > 40 && b > 20 && r > g && r > b && 
-              Math.abs(r - g) > 15 && r - b > 15) {
-            skinTonePixels++;
+          // Check for content (not too dark, not too bright)
+          if (brightness > 30 && brightness < 220) {
+            contentPixels++;
           }
           
-          // Detect dark regions (eyes, hair, shadows)
-          if (brightness < 80) {
+          // Simple skin detection
+          if (r > 60 && g > 40 && b > 20 && r > g && r > b * 1.2) {
+            skinPixels++;
+          }
+          
+          // Dark areas (hair, eyes, shadows)
+          if (brightness < 100) {
             darkPixels++;
-          }
-          
-          // Edge detection (simple gradient)
-          if (x > 0 && y > 0) {
-            const prevI = ((y-1) * canvas.width + (x-1)) * 4;
-            const prevBrightness = (data[prevI] + data[prevI + 1] + data[prevI + 2]) / 3;
-            if (Math.abs(brightness - prevBrightness) > 30) {
-              edgePixels++;
-            }
           }
         }
       }
     }
     
-    if (totalPixelsInOval === 0) {
+    if (totalPixels === 0) {
       setIsDetected(false);
       setDetectionScore(0);
+      setDebugInfo('No pixels to analyze');
       return;
     }
     
-    const avgBrightness = totalBrightness / totalPixelsInOval;
-    const skinToneRatio = skinTonePixels / totalPixelsInOval;
-    const darkRatio = darkPixels / totalPixelsInOval;
-    const edgeRatio = edgePixels / totalPixelsInOval;
+    const avgBrightness = totalBrightness / totalPixels;
+    const contentRatio = contentPixels / totalPixels;
+    const skinRatio = skinPixels / totalPixels;
+    const darkRatio = darkPixels / totalPixels;
     
-    // Scoring algorithm for face detection
+    // Simplified scoring
     let score = 0;
     
-    // Good lighting conditions (30 points)
-    if (avgBrightness > 60 && avgBrightness < 200) {
+    // Good lighting (40 points)
+    if (avgBrightness > 50 && avgBrightness < 180) {
+      score += 40;
+    } else if (avgBrightness > 30 && avgBrightness < 200) {
+      score += 20;
+    }
+    
+    // Content presence (30 points)
+    if (contentRatio > 0.7) {
       score += 30;
-    } else if (avgBrightness > 40 && avgBrightness < 220) {
+    } else if (contentRatio > 0.5) {
       score += 15;
     }
     
-    // Skin tone presence (25 points)
-    if (skinToneRatio > 0.15) {
-      score += 25;
-    } else if (skinToneRatio > 0.08) {
-      score += 12;
-    }
-    
-    // Good contrast from dark areas like eyes/hair (25 points)
-    if (darkRatio > 0.1 && darkRatio < 0.4) {
-      score += 25;
-    } else if (darkRatio > 0.05 && darkRatio < 0.5) {
-      score += 12;
-    }
-    
-    // Edge content indicating facial features (20 points)
-    if (edgeRatio > 0.08) {
+    // Skin tone (20 points) 
+    if (skinRatio > 0.1) {
       score += 20;
-    } else if (edgeRatio > 0.04) {
+    } else if (skinRatio > 0.05) {
       score += 10;
     }
     
-    const isDetected = score >= 70; // Threshold for face detection
-    setIsDetected(isDetected);
+    // Contrast from dark areas (10 points)
+    if (darkRatio > 0.1 && darkRatio < 0.5) {
+      score += 10;
+    }
+    
+    const detected = score >= 60; // Lower threshold for easier detection
+    setIsDetected(detected);
     setDetectionScore(Math.min(score, 100));
     
-    console.log('Enhanced fallback detection:', {
-      score,
-      isDetected,
-      avgBrightness: avgBrightness.toFixed(1),
-      skinToneRatio: (skinToneRatio * 100).toFixed(1) + '%',
-      darkRatio: (darkRatio * 100).toFixed(1) + '%',
-      edgeRatio: (edgeRatio * 100).toFixed(1) + '%'
-    });
+    const debug = `Face: Brightness=${avgBrightness.toFixed(0)} Content=${(contentRatio*100).toFixed(0)}% Skin=${(skinRatio*100).toFixed(0)}% Dark=${(darkRatio*100).toFixed(0)}% Score=${score}`;
+    setDebugInfo(debug);
+    console.log(debug, 'Detected:', detected);
   }, []);
 
-  // Enhanced thumb detection function
-  const detectThumb = useCallback(() => {
-    if (
-      webcamRef.current &&
-      webcamRef.current.video &&
-      webcamRef.current.video.readyState === 4
-    ) {
-      const video = webcamRef.current.video;
-      const canvas = canvasRef.current;
-      
-      if (!canvas) return;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      
-      // Analyze circular center region matching SVG guide
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const radius = Math.min(canvas.width, canvas.height) * 0.35; // 35% radius from SVG
-      
-      let darkPixels = 0;
-      let mediumPixels = 0;
-      let totalPixels = 0;
-      let avgBrightness = 0;
-      let ridgePatterns = 0;
-      let skinTonePixels = 0;
-      
-      // Analyze pixels within the circular area
-      for (let y = 0; y < canvas.height; y++) {
-        for (let x = 0; x < canvas.width; x++) {
-          const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+  // Simple thumb detection  
+  const detectThumbSimple = useCallback((data, width, height) => {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) * 0.35;
+    
+    let totalPixels = 0;
+    let contentPixels = 0;
+    let skinPixels = 0;
+    let darkPixels = 0;
+    let totalBrightness = 0;
+    
+    // Sample pixels in the circular area
+    for (let y = Math.max(0, centerY - radius); y < Math.min(height, centerY + radius); y += 2) {
+      for (let x = Math.max(0, centerX - radius); x < Math.min(width, centerX + radius); x += 2) {
+        const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+        
+        if (distance < radius) {
+          const i = (Math.floor(y) * width + Math.floor(x)) * 4;
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
           
-          if (distance < radius) {
-            const i = (y * canvas.width + x) * 4;
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-            const brightness = (r + g + b) / 3;
-            
-            avgBrightness += brightness;
-            totalPixels++;
-            
-            // Categorize pixels by brightness
-            if (brightness < 80) {
-              darkPixels++;
-            } else if (brightness < 160) {
-              mediumPixels++;
-            }
-            
-            // Detect skin tone for thumb
-            if (r > 95 && g > 40 && b > 20 && r > g && 
-                Math.abs(r - g) > 10 && r - b > 5) {
-              skinTonePixels++;
-            }
-            
-            // Simple ridge pattern detection (local contrast)
-            if (x > 2 && x < canvas.width - 2 && y > 2 && y < canvas.height - 2) {
-              let localContrast = 0;
-              for (let dy = -1; dy <= 1; dy++) {
-                for (let dx = -1; dx <= 1; dx++) {
-                  const ni = ((y + dy) * canvas.width + (x + dx)) * 4;
-                  const nBrightness = (data[ni] + data[ni + 1] + data[ni + 2]) / 3;
-                  localContrast += Math.abs(brightness - nBrightness);
-                }
-              }
-              if (localContrast > 200) {
-                ridgePatterns++;
-              }
-            }
+          const brightness = (r + g + b) / 3;
+          totalBrightness += brightness;
+          totalPixels++;
+          
+          // Content check
+          if (brightness > 40 && brightness < 200) {
+            contentPixels++;
+          }
+          
+          // Skin detection for thumb
+          if (r > 80 && g > 50 && b > 30 && r > g && r > b) {
+            skinPixels++;
+          }
+          
+          // Thumb ridges (darker areas)
+          if (brightness < 120) {
+            darkPixels++;
           }
         }
       }
-      
-      if (totalPixels === 0) {
-        setIsDetected(false);
-        setDetectionScore(0);
-        return;
-      }
-      
-      avgBrightness /= totalPixels;
-      const darkRatio = darkPixels / totalPixels;
-      const mediumRatio = mediumPixels / totalPixels;
-      const skinRatio = skinTonePixels / totalPixels;
-      const ridgeRatio = ridgePatterns / totalPixels;
-      
-      // Scoring algorithm for thumb detection
-      let score = 0;
-      
-      // Good lighting (25 points)
-      if (avgBrightness > 90 && avgBrightness < 180) {
-        score += 25;
-      } else if (avgBrightness > 70 && avgBrightness < 200) {
-        score += 15;
-      }
-      
-      // Appropriate contrast for fingerprint ridges (30 points)
-      if (darkRatio > 0.2 && darkRatio < 0.6) {
-        score += 30;
-      } else if (darkRatio > 0.15 && darkRatio < 0.7) {
-        score += 15;
-      }
-      
-      // Skin tone presence (25 points)
-      if (skinRatio > 0.3) {
-        score += 25;
-      } else if (skinRatio > 0.2) {
-        score += 15;
-      }
-      
-      // Ridge patterns indicating fingerprint (20 points)
-      if (ridgeRatio > 0.05) {
-        score += 20;
-      } else if (ridgeRatio > 0.02) {
-        score += 10;
-      }
-      
-      const isThumbDetected = score >= 70; // Threshold for thumb detection
-      setIsDetected(isThumbDetected);
-      setDetectionScore(Math.min(score, 100));
-      
-      console.log('Enhanced thumb detection:', {
-        score,
-        isDetected: isThumbDetected,
-        avgBrightness: avgBrightness.toFixed(1),
-        darkRatio: (darkRatio * 100).toFixed(1) + '%',
-        skinRatio: (skinRatio * 100).toFixed(1) + '%',
-        ridgeRatio: (ridgeRatio * 100).toFixed(1) + '%'
-      });
     }
+    
+    if (totalPixels === 0) {
+      setIsDetected(false);
+      setDetectionScore(0);
+      setDebugInfo('No pixels to analyze');
+      return;
+    }
+    
+    const avgBrightness = totalBrightness / totalPixels;
+    const contentRatio = contentPixels / totalPixels;
+    const skinRatio = skinPixels / totalPixels;
+    const darkRatio = darkPixels / totalPixels;
+    
+    // Simplified scoring 
+    let score = 0;
+    
+    // Good lighting (40 points)
+    if (avgBrightness > 70 && avgBrightness < 160) {
+      score += 40;
+    } else if (avgBrightness > 50 && avgBrightness < 180) {
+      score += 20;
+    }
+    
+    // Content presence (30 points)
+    if (contentRatio > 0.8) {
+      score += 30;
+    } else if (contentRatio > 0.6) {
+      score += 15;
+    }
+    
+    // Skin tone (20 points)
+    if (skinRatio > 0.2) {
+      score += 20;
+    } else if (skinRatio > 0.1) {
+      score += 10;
+    }
+    
+    // Fingerprint ridges (10 points)
+    if (darkRatio > 0.2 && darkRatio < 0.6) {
+      score += 10;
+    }
+    
+    const detected = score >= 60; // Lower threshold for easier detection
+    setIsDetected(detected);
+    setDetectionScore(Math.min(score, 100));
+    
+    const debug = `Thumb: Brightness=${avgBrightness.toFixed(0)} Content=${(contentRatio*100).toFixed(0)}% Skin=${(skinRatio*100).toFixed(0)}% Dark=${(darkRatio*100).toFixed(0)}% Score=${score}`;
+    setDebugInfo(debug);
+    console.log(debug, 'Detected:', detected);
   }, []);
 
-  // Start detection when models are loaded
+  // Start detection when component mounts
   useEffect(() => {
-    if (isModelLoaded) {
-      const detectionFunction = type === 'face' ? detectFace : detectThumb;
+    console.log(`Starting detection for ${type}`);
+    
+    const startDetection = () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
       
       intervalRef.current = setInterval(() => {
-        detectionFunction();
-      }, 100); // Check every 100ms for more responsive detection
-      
-      return () => {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      };
-    }
-  }, [isModelLoaded, detectFace, detectThumb, type]);
+        performDetection();
+      }, 200); // Check every 200ms
+    };
+    
+    // Start after a brief delay to ensure video is ready
+    const timer = setTimeout(startDetection, 1000);
+    
+    return () => {
+      console.log(`Stopping detection for ${type}`);
+      clearTimeout(timer);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [type, performDetection]);
 
-  const handleCapture = () => {
+  // Capture function
+  const captureImage = useCallback(() => {
     if (webcamRef.current) {
-      const screenshot = webcamRef.current.getScreenshot();
-      onCapture(screenshot);
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (imageSrc && onCapture) {
+        onCapture(imageSrc);
+      }
     }
-  };
+  }, [onCapture]);
 
-  const guideColor = isDetected ? '#00ff88' : '#ff9800';
-  const guideDashArray = isDetected ? 'none' : '5,5';
+  // Auto capture when detected
+  useEffect(() => {
+    if (isDetected && detectionScore > 70) {
+      const timer = setTimeout(() => {
+        captureImage();
+      }, 2000); // Wait 2 seconds after good detection
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isDetected, detectionScore, captureImage]);
 
   return (
-    <Box sx={{ mb: 2, border: `2px solid ${guideColor}`, borderRadius: 2, p: 1, bgcolor: '#000', position: 'relative' }}>
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          zIndex: 1,
-          opacity: 0
-        }}
-      />
-      
-      <Box sx={{ position: 'relative', width: '100%', paddingBottom: '75%' }}>
+    <Box sx={{ 
+      position: 'relative', 
+      width: '100%', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center' 
+    }}>
+      <Box sx={{ position: 'relative', width: '100%', maxWidth: 400 }}>
         <Webcam
-          audio={false}
           ref={webcamRef}
-          width="100%"
+          audio={false}
           screenshotFormat="image/jpeg"
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
             width: '100%',
-            height: '100%',
-            borderRadius: '8px'
+            height: 'auto',
+            borderRadius: '8px',
+            border: `3px solid ${isDetected ? '#4caf50' : '#ff9800'}`,
+            boxShadow: isDetected ? '0 0 20px rgba(76, 175, 80, 0.5)' : '0 0 20px rgba(255, 152, 0, 0.3)'
           }}
         />
         
-        {/* Dynamic SVG Guide */}
-        <svg
+        <canvas
+          ref={canvasRef}
           style={{
             position: 'absolute',
             top: 0,
@@ -419,211 +320,156 @@ function BiometricCapture({ type = 'face', onCapture, onCancel }) {
             width: '100%',
             height: '100%',
             pointerEvents: 'none',
-            borderRadius: '8px',
-            zIndex: 10
+            opacity: 0
           }}
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-        >
-          {/* Darken edges */}
-          <rect width="100" height="100" fill="rgba(0,0,0,0.4)" />
-          
-          {type === 'face' ? (
-            <>
-              {/* Face Guide - Oval */}
+        />
+        
+        {/* Detection overlay */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'none'
+        }}>
+          <svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 100 100"
+            style={{ 
+              position: 'absolute',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            {type === 'face' ? (
               <ellipse
                 cx="50"
                 cy="50"
                 rx="32"
                 ry="42"
                 fill="none"
-                stroke={guideColor}
-                strokeWidth="2"
-                strokeDasharray={guideDashArray}
+                stroke={isDetected ? '#4caf50' : '#ff9800'}
+                strokeWidth="3"
+                strokeDasharray={isDetected ? "0" : "5,5"}
+                style={{
+                  filter: isDetected ? 'drop-shadow(0 0 10px rgba(76, 175, 80, 0.8))' : 'none'
+                }}
               />
-              {/* Corner guides */}
-              <circle cx="50" cy="15" r="2" fill={guideColor} />
-              <circle cx="50" cy="85" r="2" fill={guideColor} />
-              <circle cx="18" cy="50" r="2" fill={guideColor} />
-              <circle cx="82" cy="50" r="2" fill={guideColor} />
-            </>
-          ) : (
-            <>
-              {/* Thumb Guide - Circle */}
+            ) : (
               <circle
                 cx="50"
                 cy="50"
                 r="35"
                 fill="none"
-                stroke={guideColor}
-                strokeWidth="2"
-                strokeDasharray={guideDashArray}
+                stroke={isDetected ? '#4caf50' : '#ff9800'}
+                strokeWidth="3"
+                strokeDasharray={isDetected ? "0" : "5,5"}
+                style={{
+                  filter: isDetected ? 'drop-shadow(0 0 10px rgba(76, 175, 80, 0.8))' : 'none'
+                }}
               />
-              {/* Center dot */}
-              <circle cx="50" cy="50" r="2" fill={guideColor} />
-              
-              {/* Directional text */}
-              <text
-                x="50"
-                y="12"
-                textAnchor="middle"
-                fill={guideColor}
-                fontSize="4"
-                fontWeight="bold"
-              >
-                ↑ PLACE THUMB HERE
-              </text>
-            </>
-          )}
-          
-          {/* Detection status */}
-          <rect x="5" y="5" width="90" height="12" fill="rgba(0,0,0,0.8)" rx="2" />
-          <text
-            x="50"
-            y="13"
-            textAnchor="middle"
-            fill={guideColor}
-            fontSize="4.5"
-            fontWeight="bold"
+            )}
+          </svg>
+        </Box>
+
+        {/* Enhanced status indicator */}
+        <Box sx={{
+          position: 'absolute',
+          top: 8,
+          left: 8,
+          right: 8,
+          backgroundColor: isDetected ? 'rgba(76, 175, 80, 0.9)' : 'rgba(255, 152, 0, 0.9)',
+          borderRadius: 2,
+          p: 1,
+          textAlign: 'center'
+        }}>
+          <Typography variant="body2" 
+            sx={{ 
+              color: 'white',
+              fontWeight: 'bold',
+              textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+            }}
           >
             {isDetected ? 
               `✓ ${type.toUpperCase()} DETECTED (${Math.round(detectionScore)}%)` : 
-              `Position ${type} in the guide...`
-            }
-          </text>
-          
-          {/* Bottom instruction */}
-          <rect x="5" y="88" width="90" height="10" fill="rgba(0,0,0,0.8)" rx="1" />
-          <text 
-            x="50" 
-            y="95" 
-            textAnchor="middle" 
-            fill={guideColor} 
-            fontSize="4"
-            fontWeight="bold"
-          >
-            {type === 'face' ? 
-              (isDetected ? 'Perfect! Ready to capture' : 'Center your face in the oval') :
-              (isDetected ? 'Great! Thumb positioned correctly' : 'Place thumb in the circle')
-            }
-          </text>
-        </svg>
-      </Box>
-      
-      {/* Status Alert */}
-      {!isModelLoaded && type === 'face' && (
-        <Alert severity="info" sx={{ mt: 1, fontSize: '0.8rem' }}>
-          Loading detection models... This may take a moment.
-        </Alert>
-      )}
-      
-      {isDetected ? (
-        <Alert severity="success" sx={{ mt: 1, fontSize: '0.85rem', fontWeight: 600 }}>
-          🎯 {type === 'face' ? 'Face' : 'Thumbprint'} detected in perfect position! 
-          <strong> Quality: {Math.round(detectionScore)}% - Ready to capture!</strong>
-        </Alert>
-      ) : (
-        <Alert severity="warning" sx={{ mt: 1, fontSize: '0.8rem' }}>
-          📍 Position your {type} within the {type === 'face' ? 'oval' : 'circular'} guides above. 
-          {detectionScore > 30 && ` Almost there... (${Math.round(detectionScore)}%)`}
-        </Alert>
-      )}
-      
-      {/* Positioning Tips */}
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr',
-        gap: 1,
-        mt: 2,
-        mb: 2
-      }}>
-        <Box sx={{ 
-          bgcolor: `rgba(${isDetected ? '0,255,136' : '255,152,0'},0.1)`,
-          border: `1px solid ${guideColor}`,
-          p: 1.5,
-          borderRadius: 1,
-          fontSize: '0.85rem',
-          color: guideColor
-        }}>
-          <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, mb: 0.5 }}>
-            ✓ Good Position
-          </Typography>
-          <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
-            {type === 'face' ? 
-              '• Face centered\n• Good lighting\n• Eyes open\n• Neutral look' :
-              '• Thumb centered\n• Flat surface\n• Clear ridges\n• Steady position'
+              `Position your ${type} in the ${type === 'face' ? 'oval' : 'circle'}`
             }
           </Typography>
         </Box>
-        <Box sx={{ 
-          bgcolor: 'rgba(255,68,68,0.1)',
-          border: '1px solid #ff4444',
-          p: 1.5,
-          borderRadius: 1,
-          fontSize: '0.85rem',
-          color: '#ff9999'
+
+        {/* Progress bar for detection score */}
+        <Box sx={{
+          position: 'absolute',
+          bottom: 8,
+          left: 8,
+          right: 8,
+          height: 6,
+          backgroundColor: 'rgba(0,0,0,0.3)',
+          borderRadius: 3,
+          overflow: 'hidden'
         }}>
-          <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, mb: 0.5 }}>
-            ✗ Avoid
-          </Typography>
-          <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
-            {type === 'face' ?
-              '• Too dark/bright\n• Off-center\n• Blurry image\n• Extreme angles' :
-              '• Angled thumb\n• Blurry image\n• Too dark/light\n• Off-center'
-            }
-          </Typography>
+          <Box sx={{
+            width: `${detectionScore}%`,
+            height: '100%',
+            backgroundColor: isDetected ? '#4caf50' : '#ff9800',
+            borderRadius: 3,
+            transition: 'width 0.3s ease'
+          }} />
         </Box>
       </Box>
-      
-      <ButtonGroup fullWidth sx={{ mt: 1 }}>
+
+      {/* Debug info display */}
+      {debugInfo && (
+        <Alert severity="info" sx={{ mt: 1, fontSize: '0.75rem', maxWidth: 400 }}>
+          {debugInfo}
+        </Alert>
+      )}
+
+      {/* Control buttons */}
+      <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
         <Button
           variant="contained"
-          onClick={handleCapture}
-          disabled={!isDetected}
+          size="large"
+          onClick={captureImage}
           sx={{
-            bgcolor: isDetected ? '#00ff88' : '#444',
-            color: isDetected ? '#000' : '#999',
+            backgroundColor: isDetected ? '#4caf50' : '#ff9800',
+            px: 4,
             py: 1.5,
-            fontWeight: 700,
-            borderRadius: 2,
-            boxShadow: isDetected ? '0 4px 15px rgba(0,255,136,0.4)' : 'none',
+            fontSize: '1.1rem',
+            fontWeight: 'bold',
             '&:hover': {
-              bgcolor: isDetected ? '#00cc6a' : '#555',
-              transform: isDetected ? 'translateY(-2px)' : 'none',
-              boxShadow: isDetected ? '0 6px 20px rgba(0,255,136,0.6)' : 'none'
-            },
-            '&:disabled': {
-              bgcolor: '#333',
-              color: '#666',
-              cursor: 'not-allowed'
-            },
-            transition: 'all 0.3s ease'
-          }}
-        >
-          {isDetected ? 
-            `✓ Capture ${type === 'face' ? 'Face' : 'Thumbprint'} (${Math.round(detectionScore)}%)` : 
-            `Position ${type === 'face' ? 'face' : 'thumb'} to enable capture`
-          }
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={onCancel}
-          sx={{
-            borderColor: '#ff4444',
-            color: '#ff4444',
-            py: 1.5,
-            fontWeight: 600,
-            '&:hover': {
-              borderColor: '#ff4444',
-              bgcolor: 'rgba(255,68,68,0.1)'
+              backgroundColor: isDetected ? '#45a049' : '#e68900'
             }
           }}
+        >
+          {isDetected ? `Capture ${type}` : `Manual Capture`}
+        </Button>
+        <Button 
+          variant="outlined" 
+          size="large"
+          onClick={onCancel}
+          sx={{ px: 3, py: 1.5 }}
         >
           Cancel
         </Button>
-      </ButtonGroup>
+      </Box>
+
+      {/* Simple instructions */}
+      <Typography variant="body2" sx={{ mt: 2, textAlign: 'center', color: 'text.secondary' }}>
+        {type === 'face' ? 
+          'Center your face in the oval guide' : 
+          'Place your thumb completely in the circle'
+        }
+      </Typography>
     </Box>
   );
 }
+
+export default BiometricCapture;
 
 export default BiometricCapture;
