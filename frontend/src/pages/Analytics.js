@@ -97,20 +97,20 @@ function Analytics() {
   // Calculate metrics
   const calculateMetrics = () => {
     if (!stats?.system_stats) {
-      return { far: '0', frr: '0', eer: '0', accuracy: '0', errorRate: '0' };
+      return { far: '0.00', frr: '0.00', eer: '0.00', accuracy: '0.00', errorRate: '0.00' };
     }
     
     const total = stats.system_stats.total_authentications || 0;
     const successful = stats.system_stats.successful_authentications || 0;
     
-    // If no data yet, return placeholder values as strings
+    // If no data yet, return zero values (not N/A to maintain number formatting)
     if (total === 0) {
       return {
-        accuracy: '0',
-        errorRate: '0',
-        far: '0',
-        frr: '0',
-        eer: '0'
+        accuracy: '0.00',
+        errorRate: '0.00',
+        far: '0.00',
+        frr: '0.00',
+        eer: '0.00'
       };
     }
     
@@ -121,12 +121,18 @@ function Analytics() {
     
     const errorRate = (100 - parseFloat(accuracy)).toFixed(2);
     
+    // Note: Since the system doesn't distinguish between false acceptance and 
+    // false rejection in the logs, we estimate these based on typical biometric
+    // system behavior. In practice, these would require tracking genuine vs impostor attempts.
+    // For now, we split the error rate equally as EER (Equal Error Rate) scenario.
+    const eer = (parseFloat(errorRate) / 2).toFixed(2);
+    
     return {
       accuracy,
       errorRate,
-      far: (errorRate * 0.4).toFixed(2),
-      frr: (errorRate * 0.6).toFixed(2),
-      eer: (errorRate / 2).toFixed(2)
+      far: eer,
+      frr: eer,
+      eer: eer
     };
   };
 
