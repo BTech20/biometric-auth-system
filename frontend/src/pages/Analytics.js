@@ -130,8 +130,8 @@ function Analytics() {
     return {
       accuracy,
       errorRate,
-      far: eer,    // In EER scenario, FAR = FRR = errorRate/2
-      frr: eer,    // In EER scenario, FAR = FRR = errorRate/2
+      far: eer,
+      frr: eer,
       eer: eer
     };
   };
