@@ -1,8 +1,0 @@
-[build]
-builder = "dockerfile"
-dockerfilePath = "frontend/Dockerfile"
-dockerContext = "frontend"
-
-[deploy]
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
