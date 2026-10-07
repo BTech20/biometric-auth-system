@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Container, Paper, TextField, Button, Typography, Box, Alert, Stepper, Step, StepLabel, ButtonGroup, Fade, Slide, InputAdornment, IconButton, Divider, CircularProgress } from '@mui/material';
 import { CameraAlt, Upload, Person, Email, Lock, Visibility, VisibilityOff, HowToReg } from '@mui/icons-material';
