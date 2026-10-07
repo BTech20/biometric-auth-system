@@ -2,11 +2,11 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Paper, Typography, Box, Button, Alert, CircularProgress, LinearProgress, ButtonGroup, Fade, Slide, Chip, Divider } from '@mui/material';
 import { ArrowBack, Fingerprint, CheckCircle, Cancel, CameraAlt, Upload, FaceRetouchingNatural, FingerprintOutlined, Face } from '@mui/icons-material';
-import Webcam from 'react-webcam';
 import { authService } from '../services/api';
 import HardwareFingerprintScanner from '../components/HardwareFingerprintScanner';
 import ThresholdConfig from '../components/ThresholdConfig';
 import ImageQualityCheck from '../components/ImageQualityCheck';
+import WorkingBiometricCapture from '../components/WorkingBiometricCapture';
 
 function BiometricVerify() {
   const navigate = useNavigate();
@@ -300,42 +300,14 @@ function BiometricVerify() {
                 }
               }} />
               {showWebcam && (
-                <Box sx={{ mb: 2, border: '2px solid #00ff88', borderRadius: 2, p: 1, bgcolor: '#000' }}>
-                  <Webcam audio={false} ref={webcamRef} width="100%" screenshotFormat="image/jpeg" style={{ borderRadius: '8px' }} />
-                  <ButtonGroup fullWidth sx={{ mt: 2 }}>
-                    <Button 
-                      variant="contained" 
-                      onClick={() => { setFaceImage(webcamRef.current.getScreenshot()); setShowWebcam(false); }}
-                      sx={{
-                        bgcolor: '#00ff88',
-                        color: '#000',
-                        py: 1.5,
-                        fontWeight: 700,
-                        '&:hover': {
-                          bgcolor: '#00cc6a'
-                        }
-                      }}
-                    >
-                      Capture
-                    </Button>
-                    <Button 
-                      variant="outlined" 
-                      onClick={() => setShowWebcam(false)}
-                      sx={{
-                        borderColor: '#ff4444',
-                        color: '#ff4444',
-                        py: 1.5,
-                        fontWeight: 600,
-                        '&:hover': {
-                          borderColor: '#ff4444',
-                          bgcolor: 'rgba(255,68,68,0.1)'
-                        }
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </ButtonGroup>
-                </Box>
+                <WorkingBiometricCapture 
+                  type="face"
+                  onCapture={(imageData) => {
+                    setFaceImage(imageData);
+                    setShowWebcam(false);
+                  }}
+                  onCancel={() => setShowWebcam(false)}
+                />
               )}
               {faceImage && !showWebcam && (
                 <Box sx={{ mb: 3, p: 2, bgcolor: '#000', borderRadius: 2, border: '2px solid #00ff88' }}>
@@ -445,37 +417,14 @@ function BiometricVerify() {
                     }
                   }} />
                   {showFpWebcam && (
-                    <Box sx={{ mb: 2 }}>
-                      <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
-                        <Typography variant="body2">
-                          Hold your thumb clearly in front of the camera, then click "Capture Thumb"
-                        </Typography>
-                      </Alert>
-                      <Webcam audio={false} ref={fpWebcamRef} width="100%" screenshotFormat="image/jpeg" />
-                      <ButtonGroup fullWidth sx={{ mt: 1 }}>
-                        <Button 
-                          variant="contained" 
-                          onClick={() => { 
-                            setFingerprintImage(fpWebcamRef.current.getScreenshot()); 
-                            setShowFpWebcam(false); 
-                          }}
-                          sx={{
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            py: 1.5,
-                            fontWeight: 600
-                          }}
-                        >
-                          Capture Thumb
-                        </Button>
-                        <Button 
-                          variant="outlined" 
-                          onClick={() => setShowFpWebcam(false)}
-                          sx={{ py: 1.5 }}
-                        >
-                          Cancel
-                        </Button>
-                      </ButtonGroup>
-                    </Box>
+                    <WorkingBiometricCapture 
+                      type="thumb"
+                      onCapture={(imageData) => {
+                        setFingerprintImage(imageData);
+                        setShowFpWebcam(false);
+                      }}
+                      onCancel={() => setShowFpWebcam(false)}
+                    />
                   )}
                 </>
               )}

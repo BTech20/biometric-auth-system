@@ -1,11 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Container, Paper, TextField, Button, Typography, Box, Alert, Stepper, Step, StepLabel, ButtonGroup, Fade, Slide, InputAdornment, IconButton, Divider, CircularProgress } from '@mui/material';
 import { CameraAlt, Upload, Person, Email, Lock, Visibility, VisibilityOff, HowToReg } from '@mui/icons-material';
-import Webcam from 'react-webcam';
 import { authService } from '../services/api';
 import HardwareFingerprintScanner from '../components/HardwareFingerprintScanner';
 import ImageQualityCheck from '../components/ImageQualityCheck';
+import WorkingBiometricCapture from '../components/WorkingBiometricCapture';
 
 const steps = ['Account Details', 'Face Capture', 'Fingerprint Scan'];
 
@@ -28,7 +28,13 @@ function Register({ setIsAuthenticated }) {
   const faceUploadRef = useRef(null);
   const fpUploadRef = useRef(null);
 
+  // Debug logging for showWebcam state changes
+  useEffect(() => {
+    console.log('🔄 showWebcam changed to:', showWebcam);
+  }, [showWebcam]);
+
   const handleNext = () => {
+    console.log('🔄 Register handleNext called, activeStep:', activeStep);
     if (activeStep === 0 && (!username || !email || !password)) {
       setError('Fill all fields');
       return;
@@ -216,7 +222,10 @@ function Register({ setIsAuthenticated }) {
                     }
                   }
                 }}>
-                  <Button startIcon={<CameraAlt />} onClick={() => setShowWebcam(true)}>Capture Face</Button>
+                  <Button startIcon={<CameraAlt />} onClick={() => {
+                    console.log('🎥 Capture Face button clicked');
+                    setShowWebcam(true);
+                  }}>Capture Face</Button>
                   <Button startIcon={<Upload />} onClick={() => faceUploadRef.current.click()}>Upload Image</Button>
                 </ButtonGroup>
               )}
@@ -229,34 +238,18 @@ function Register({ setIsAuthenticated }) {
                 }
               }} />
               {showWebcam && (
-                <Box sx={{ mb: 2 }}>
-                  <Webcam audio={false} ref={webcamRef} width="100%" screenshotFormat="image/jpeg" />
-                  <ButtonGroup fullWidth sx={{ mt: 1 }}>
-                    <Button 
-                      variant="contained" 
-                      onClick={() => { setFaceImage(webcamRef.current.getScreenshot()); setShowWebcam(false); }}
-                      sx={{
-                        bgcolor: '#00ff88',
-                        color: '#000',
-                        fontWeight: 700,
-                        '&:hover': { bgcolor: '#00cc6a' }
-                      }}
-                    >
-                      Capture
-                    </Button>
-                    <Button 
-                      variant="outlined" 
-                      onClick={() => setShowWebcam(false)}
-                      sx={{ 
-                        color: '#ff4444', 
-                        borderColor: '#ff4444',
-                        '&:hover': { borderColor: '#cc0000', bgcolor: 'rgba(255,68,68,0.1)' }
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </ButtonGroup>
-                </Box>
+                <WorkingBiometricCapture 
+                  type="face"
+                  onCapture={(imageData) => {
+                    console.log('📸 Face captured successfully');
+                    setFaceImage(imageData);
+                    setShowWebcam(false);
+                  }}
+                  onCancel={() => {
+                    console.log('❌ Face capture cancelled');
+                    setShowWebcam(false);
+                  }}
+                />
               )}
               {faceImage && !showWebcam && (
                 <Box sx={{ mb: 2 }}>
@@ -341,44 +334,18 @@ function Register({ setIsAuthenticated }) {
                     }
                   }} />
                   {showFpWebcam && (
-                    <Box sx={{ mb: 2 }}>
-                      <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
-                        <Typography variant="body2">
-                          Hold your thumb clearly in front of the camera, then click "Capture Thumb"
-                        </Typography>
-                      </Alert>
-                      <Webcam audio={false} ref={fpWebcamRef} width="100%" screenshotFormat="image/jpeg" />
-                      <ButtonGroup fullWidth sx={{ mt: 1 }}>
-                        <Button 
-                          variant="contained" 
-                          onClick={() => { 
-                            setFingerprintImage(fpWebcamRef.current.getScreenshot()); 
-                            setShowFpWebcam(false); 
-                          }}
-                          sx={{
-                            bgcolor: '#00ff88',
-                            color: '#000',
-                            py: 1.5,
-                            fontWeight: 700,
-                            '&:hover': { bgcolor: '#00cc6a' }
-                          }}
-                        >
-                          Capture Thumb
-                        </Button>
-                        <Button 
-                          variant="outlined" 
-                          onClick={() => setShowFpWebcam(false)}
-                          sx={{ 
-                            py: 1.5,
-                            color: '#ff4444',
-                            borderColor: '#ff4444',
-                            '&:hover': { borderColor: '#cc0000', bgcolor: 'rgba(255,68,68,0.1)' }
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </ButtonGroup>
-                    </Box>
+                    <WorkingBiometricCapture 
+                      type="thumb"
+                      onCapture={(imageData) => {
+                        console.log('📸 Thumb captured successfully');
+                        setFingerprintImage(imageData);
+                        setShowFpWebcam(false);
+                      }}
+                      onCancel={() => {
+                        console.log('❌ Thumb capture cancelled');
+                        setShowFpWebcam(false);
+                      }}
+                    />
                   )}
                 </>
               )}

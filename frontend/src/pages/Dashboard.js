@@ -370,8 +370,7 @@ function Dashboard({ setIsAuthenticated }) {
                       </CardContent>
                     </Card>
                   </Slide>
-                </Box>
-              </Fade>
+            </Grid>
             </Grid>
           </Box>
         </Fade>

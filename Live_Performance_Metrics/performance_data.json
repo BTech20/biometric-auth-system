@@ -1,0 +1,21 @@
+{
+  "system_availability": {
+    "total_requests": 120,
+    "successful_requests": 120,
+    "availability_percentage": 100.0,
+    "error_rate": 0.0
+  },
+  "response_performance": {
+    "mean_response_time_ms": 393.4866468111674,
+    "median_response_time_ms": 390.07747173309326,
+    "min_response_time_ms": 373.4562397003174,
+    "max_response_time_ms": 442.56114959716797,
+    "std_response_time_ms": 13.91460542123065
+  },
+  "load_performance": {
+    "total_load_tests": 50,
+    "successful_load_tests": 50,
+    "load_success_rate": 100.0,
+    "avg_load_response_time": 389.95806217193604
+  }
+}
